@@ -63,4 +63,10 @@ export default {
       };
     },
   },
+  subscriptions: {
+    setup( {dispatch} ) {
+      // dispatch({ type: 'query' });
+      console.log('model user setUp');
+    },
+  },
 };

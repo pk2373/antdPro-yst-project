@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Layout, Menu, Icon, Avatar, Dropdown, Tag, message, Spin } from 'antd';
 import DocumentTitle from 'react-document-title';
 import { connect } from 'dva';
-import { Link, Route, Redirect, Switch } from 'dva/router';
+import { routerRedux, Link, Route, Redirect, Switch } from 'dva/router';
 import moment from 'moment';
 import groupBy from 'lodash/groupBy';
 import { ContainerQuery } from 'react-container-query';
@@ -66,6 +66,11 @@ class BasicLayout extends React.PureComponent {
     this.props.dispatch({
       type: 'user/fetchCurrent',
     });
+  }
+  componentWillReceiveProps(nextProps) {
+    if (!nextProps.loginStatus) {
+      this.props.dispatch(routerRedux.push('/user/login'));
+    }
   }
   componentWillUnmount() {
     clearTimeout(this.resizeTimeout);
@@ -219,8 +224,7 @@ class BasicLayout extends React.PureComponent {
     }
   }
   render() {
-    const { currentUser, collapsed, fetchingNotices } = this.props;
-
+    const { loginStatus, currentUser, collapsed, fetchingNotices } = this.props;
     const menu = (
       <Menu className={styles.menu} selectedKeys={[]} onClick={this.onMenuClick}>
         <Menu.Item disabled><Icon type="user" />个人中心</Menu.Item>
@@ -375,6 +379,7 @@ class BasicLayout extends React.PureComponent {
 }
 
 export default connect(state => ({
+  loginStatus: state.login.status,
   currentUser: state.user.currentUser,
   collapsed: state.global.collapsed,
   fetchingNotices: state.global.fetchingNotices,

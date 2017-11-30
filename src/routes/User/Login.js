@@ -22,10 +22,6 @@ export default class Login extends Component {
     }
   }
 
-  componentWillUnmount() {
-    clearInterval(this.interval);
-  }
-
   handleSubmit = (e) => {
     e.preventDefault();
     const { type } = this.state;

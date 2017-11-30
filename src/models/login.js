@@ -31,7 +31,7 @@ export default {
           status: false,
         },
       });
-      yield put(routerRedux.push('/user/login'));
+      // yield put(routerRedux.push('/user/login'));
     },
   },
 
@@ -48,6 +48,12 @@ export default {
         ...state,
         submitting: payload,
       };
+    },
+  },
+  subscriptions: {
+    setup( {dispatch} ) {
+      // dispatch({ type: 'query' });
+      console.log('model login setUp');
     },
   },
 };
