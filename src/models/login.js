@@ -14,10 +14,17 @@ export default {
         type: 'changeSubmitting',
         payload: true,
       });
+      let status = 'error';
       const response = yield call(fakeAccountLogin, payload);
+      if (response.success){
+        status = 'ok';
+      }
       yield put({
         type: 'changeLoginStatus',
-        payload: response,
+        payload: {
+          status: status,
+          type: 'account',
+        },
       });
       yield put({
         type: 'changeSubmitting',

@@ -28,9 +28,12 @@ export default class Login extends Component {
     this.props.form.validateFields({ force: true },
       (err, values) => {
         if (!err) {
+          values.systemId = '599e2e70d39b435fbb77a2eb8e7caafb';
           this.props.dispatch({
             type: `login/${type}Submit`,
-            payload: values,
+            payload: {
+              params: values,
+            },
           });
         }
       }
@@ -62,7 +65,7 @@ export default class Login extends Component {
             this.renderMessage('账户或密码错误')
           }
           <FormItem>
-            {getFieldDecorator('userName', {
+            {getFieldDecorator('username', {
               rules: [{
                 required: type === 'account', message: '请输入账户名！',
               }],
