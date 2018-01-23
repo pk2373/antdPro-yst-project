@@ -3,7 +3,6 @@ import { fakeAccountLogin } from '../services/api';
 
 export default {
   namespace: 'login',
-
   state: {
     status: undefined,
   },

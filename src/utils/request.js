@@ -55,7 +55,8 @@ function xhrRequest({ url, method = 'POST', contentType = 'application/json', li
   });
 }
 
-const host = 'http://test.gdyunst.com:8084';
+// const host = 'http://test.gdyunst.com:8084';
+const host = 'http://192.168.1.118:8088';
 export default function request(link, options) {
   const url = host + link;
   return xhrRequest({ url: url, ...options })
