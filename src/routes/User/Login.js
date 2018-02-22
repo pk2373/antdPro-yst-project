@@ -1,13 +1,12 @@
-import React, { Component } from 'react';
-import { connect } from 'dva';
-import { Link } from 'dva/router';
-import { Checkbox, Alert, Icon } from 'antd';
+import React, {Component} from 'react';
+import {connect} from 'dva';
+import {Link} from 'dva/router';
+import {Checkbox, Alert, Icon} from 'antd';
 import Login from '../../components/Login';
 import styles from './Login.less';
 
-const { Tab, UserName, Password, Mobile, Captcha, Submit } = Login;
-
-@connect(({ login, loading }) => ({
+const {Tab, UserName, Password, Mobile, Captcha, Submit} = Login;
+@connect(({login, loading}) => ({
   login,
   submitting: loading.effects['login/login'],
 }))
@@ -18,21 +17,24 @@ export default class LoginPage extends Component {
   }
 
   onTabChange = (type) => {
-    this.setState({ type });
+    this.setState({type});
   }
 
   handleSubmit = (err, values) => {
     if (!err) {
       this.props.dispatch({
         type: 'login/login',
-        payload: {
-          params: {
-            ...values,
-            subsystemEntity: {
-              code: 'S01',
-            },
-          },
-        },
+        payload: values,
+        /*
+                payload: {
+                  params: {
+                    ...values,
+                    subsystemEntity: {
+                      code: 'S01',
+                    },
+                  },
+                },
+                */
       });
     }
   }
@@ -45,13 +47,13 @@ export default class LoginPage extends Component {
 
   renderMessage = (content) => {
     return (
-      <Alert style={{ marginBottom: 24 }} message={content} type="error" showIcon />
+      <Alert style={{marginBottom: 24}} message={content} type="error" showIcon />
     );
   }
 
   render() {
-    const { login, submitting } = this.props;
-    const { type } = this.state;
+    const {login, submitting} = this.props;
+    const {type} = this.state;
     return (
       <div className={styles.main}>
         <Login
@@ -80,7 +82,7 @@ export default class LoginPage extends Component {
           </Tab>
           <div>
             <Checkbox checked={this.state.autoLogin} onChange={this.changeAutoLogin}>自动登录</Checkbox>
-            <a style={{ float: 'right' }} href="">忘记密码</a>
+            <a style={{float: 'right'}} href="">忘记密码</a>
           </div>
           <Submit loading={submitting}>登录</Submit>
           <div className={styles.other}>

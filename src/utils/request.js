@@ -1,6 +1,6 @@
 import fetch from 'dva/fetch';
-import { notification } from 'antd';
-import { routerRedux } from 'dva/router';
+import {notification} from 'antd';
+import {routerRedux} from 'dva/router';
 import store from '../index';
 
 const codeMessage = {
@@ -20,6 +20,7 @@ const codeMessage = {
   503: '服务不可用，服务器暂时过载或维护。',
   504: '网关超时。',
 };
+
 function checkStatus(response) {
   if (response.status >= 200 && response.status < 300) {
     return response;
@@ -37,8 +38,9 @@ function checkStatus(response) {
 }
 
 
-function xhrRequest({ url, method = 'POST', contentType = 'application/json', limit = 20, page = 1, uid = '', params = {} }) {
-  return new Promise(function (resolve) {
+// XMLHttpRequest
+function xhrRequest({url, method = 'POST', contentType = 'application/json', limit = 20, page = 1, uid = '', params = {}}) {
+  return new Promise((resolve) => {
     if (!url) {
       return;
     }
@@ -62,10 +64,11 @@ function xhrRequest({ url, method = 'POST', contentType = 'application/json', li
     xhr.open(method, url);
     xhr.setRequestHeader('Content-Type', contentType);
     xhr.send(JSON.stringify(allParams));
-  });
+  } );
 }
 
 // const host = 'http://test.gdyunst.com:8084';
+/*
 const host = 'http://192.168.1.118:8088';
 export default function request(link, options) {
   const url = host + link;
@@ -76,6 +79,7 @@ export default function request(link, options) {
       return error;
     });
 }
+*/
 /**
  * Requests a URL, returning a promise.
  *
@@ -83,12 +87,11 @@ export default function request(link, options) {
  * @param  {object} [options] The options we want to pass to "fetch"
  * @return {object}           An object containing either "data" or "err"
  */
-/*
 export default function request(url, options) {
   const defaultOptions = {
     credentials: 'include',
   };
-  const newOptions = { ...defaultOptions, ...options };
+  const newOptions = {...defaultOptions, ...options};
   if (newOptions.method === 'POST' || newOptions.method === 'PUT') {
     if (!(newOptions.body instanceof FormData)) {
       newOptions.headers = {
@@ -116,7 +119,7 @@ export default function request(url, options) {
       return response.json();
     })
     .catch((e) => {
-      const { dispatch } = store;
+      const {dispatch} = store;
       const status = e.name;
       if (status === 401) {
         dispatch({
@@ -137,4 +140,3 @@ export default function request(url, options) {
       }
     });
 }
-*/

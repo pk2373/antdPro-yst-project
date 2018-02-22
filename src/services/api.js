@@ -61,8 +61,14 @@ export async function queryFakeList(params) {
 }
 
 export async function accountLogin(data) {
-  return request('/public/api/login', {
+/*
+return request('/public/api/login', {
     ...data,
+  });
+  */
+  return request('/api/login/account', {
+    method: 'POST',
+    body: data,
   });
 }
 
