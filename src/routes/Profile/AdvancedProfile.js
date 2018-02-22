@@ -1,5 +1,6 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import Debounce from 'lodash-decorators/debounce';
+import Bind from 'lodash-decorators/bind';
 import { connect } from 'dva';
 import { Button, Menu, Dropdown, Icon, Row, Col, Steps, Card, Popover, Badge, Table, Tooltip, Divider } from 'antd';
 import classNames from 'classnames';
@@ -22,7 +23,7 @@ const menu = (
 );
 
 const action = (
-  <div>
+  <Fragment>
     <ButtonGroup>
       <Button>操作</Button>
       <Button>操作</Button>
@@ -31,7 +32,7 @@ const action = (
       </Dropdown>
     </ButtonGroup>
     <Button type="primary">主操作</Button>
-  </div>
+  </Fragment>
 );
 
 const extra = (
@@ -68,20 +69,20 @@ const tabList = [{
 
 const desc1 = (
   <div className={classNames(styles.textSecondary, styles.stepDescription)}>
-    <div>
+    <Fragment>
       曲丽丽
       <Icon type="dingding-o" style={{ marginLeft: 8 }} />
-    </div>
+    </Fragment>
     <div>2016-12-12 12:32</div>
   </div>
 );
 
 const desc2 = (
   <div className={styles.stepDescription}>
-    <div>
+    <Fragment>
       周毛毛
       <Icon type="dingding-o" style={{ color: '#00A0E9', marginLeft: 8 }} />
-    </div>
+    </Fragment>
     <div><a href="">催一下</a></div>
   </div>
 );
@@ -92,16 +93,15 @@ const popoverContent = (
     <span className={styles.textSecondary} style={{ float: 'right' }}>
       <Badge status="default" text={<span style={{ color: 'rgba(0, 0, 0, 0.45)' }}>未响应</span>} />
     </span>
-    <p className={styles.textSecondary} style={{ marginTop: 4 }}>耗时：2小时25分钟</p>
+    <div className={styles.textSecondary} style={{ marginTop: 4 }}>耗时：2小时25分钟</div>
   </div>
 );
 
-const customDot = (dot, { status }) => (status === 'process' ?
+const customDot = (dot, { status }) => (status === 'process' ? (
   <Popover placement="topLeft" arrowPointAtCenter content={popoverContent}>
     {dot}
   </Popover>
-  : dot
-);
+) : dot);
 
 const operationTabList = [{
   key: 'tab1',
@@ -139,8 +139,9 @@ const columns = [{
   key: 'memo',
 }];
 
-@connect(state => ({
-  profile: state.profile,
+@connect(({ profile, loading }) => ({
+  profile,
+  loading: loading.effects['profile/fetchAdvanced'],
 }))
 export default class AdvancedProfile extends Component {
   state = {
@@ -160,14 +161,16 @@ export default class AdvancedProfile extends Component {
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.setStepDirection);
+    this.setStepDirection.cancel();
   }
 
   onOperationTabChange = (key) => {
     this.setState({ operationkey: key });
   }
 
+  @Bind()
   @Debounce(200)
-  setStepDirection = () => {
+  setStepDirection() {
     const { stepDirection } = this.state;
     const w = getWindowWidth();
     if (stepDirection !== 'vertical' && w <= 576) {
@@ -183,24 +186,24 @@ export default class AdvancedProfile extends Component {
 
   render() {
     const { stepDirection } = this.state;
-    const { profile } = this.props;
-    const { advancedLoading, advancedOperation1, advancedOperation2, advancedOperation3 } = profile;
+    const { profile, loading } = this.props;
+    const { advancedOperation1, advancedOperation2, advancedOperation3 } = profile;
     const contentList = {
       tab1: <Table
         pagination={false}
-        loading={advancedLoading}
+        loading={loading}
         dataSource={advancedOperation1}
         columns={columns}
       />,
       tab2: <Table
         pagination={false}
-        loading={advancedLoading}
+        loading={loading}
         dataSource={advancedOperation2}
         columns={columns}
       />,
       tab3: <Table
         pagination={false}
-        loading={advancedLoading}
+        loading={loading}
         dataSource={advancedOperation3}
         columns={columns}
       />,

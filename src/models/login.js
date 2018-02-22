@@ -1,65 +1,61 @@
 import { routerRedux } from 'dva/router';
-import { fakeAccountLogin } from '../services/api';
+import { accountLogin } from '../services/api';
+import { setAuthority } from '../utils/authority';
+import { reloadAuthorized } from '../utils/Authorized';
 
 export default {
   namespace: 'login',
+
   state: {
     status: undefined,
   },
 
   effects: {
-    *accountSubmit({ payload }, { call, put }) {
+    *login({ payload }, { call, put }) {
+      const response = yield call(accountLogin, payload);
       yield put({
-        type: 'changeSubmitting',
-        payload: true,
+        type: 'changeLoginStatus',
+        payload: {
+          status: response.success,
+          currentAuthority: 'admin', // 权限控制
+        },
       });
-      let status = 'error';
-      const response = yield call(fakeAccountLogin, payload);
-      if (response.success){
-        status = 'ok';
+      // Login successfully
+      if (response.success) {
+        reloadAuthorized();
+        yield put(routerRedux.push('/'));
       }
-      yield put({
-        type: 'changeLoginStatus',
-        payload: {
-          status: status,
-          type: 'account',
-        },
-      });
-      yield put({
-        type: 'changeSubmitting',
-        payload: false,
-      });
     },
-    *logout(_, { put }) {
-      yield put({
-        type: 'changeLoginStatus',
-        payload: {
-          status: false,
-        },
-      });
-      // yield put(routerRedux.push('/user/login'));
+    *logout(_, { put, select }) {
+      try {
+        // get location pathname
+        const urlParams = new URL(window.location.href);
+        const pathname = yield select(state => state.routing.location.pathname);
+        // add the parameters in the url
+        urlParams.searchParams.set('redirect', pathname);
+        window.history.replaceState(null, 'login', urlParams.href);
+      } finally {
+        yield put({
+          type: 'changeLoginStatus',
+          payload: {
+            status: false,
+            currentAuthority: 'guest',
+          },
+        });
+        reloadAuthorized();
+        yield put(routerRedux.push('/user/login'));
+      }
     },
   },
 
   reducers: {
     changeLoginStatus(state, { payload }) {
+      setAuthority(payload.currentAuthority);
       return {
         ...state,
         status: payload.status,
         type: payload.type,
       };
-    },
-    changeSubmitting(state, { payload }) {
-      return {
-        ...state,
-        submitting: payload,
-      };
-    },
-  },
-  subscriptions: {
-    setup( {dispatch} ) {
-      // dispatch({ type: 'query' });
-      console.log('model login setUp');
     },
   },
 };

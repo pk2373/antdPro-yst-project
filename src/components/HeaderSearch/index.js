@@ -8,7 +8,6 @@ export default class HeaderSearch extends PureComponent {
   static defaultProps = {
     defaultActiveFirstOption: false,
     onPressEnter: () => {},
-    onChange: () => {},
     onSearch: () => {},
     className: '',
     placeholder: '',
@@ -19,7 +18,6 @@ export default class HeaderSearch extends PureComponent {
     placeholder: PropTypes.string,
     onSearch: PropTypes.func,
     onPressEnter: PropTypes.func,
-    onChange: PropTypes.func,
     defaultActiveFirstOption: PropTypes.bool,
     dataSource: PropTypes.array,
   };
@@ -39,7 +37,9 @@ export default class HeaderSearch extends PureComponent {
   }
   onChange = (value) => {
     this.setState({ value });
-    this.props.onChange();
+    if (this.props.onChange) {
+      this.props.onChange();
+    }
   }
   enterSearchMode = () => {
     this.setState({ searchMode: true }, () => {
@@ -64,12 +64,13 @@ export default class HeaderSearch extends PureComponent {
         className={classNames(className, styles.headerSearch)}
         onClick={this.enterSearchMode}
       >
-        <Icon type="search" />
+        <Icon type="search" key="Icon" />
         <AutoComplete
+          key="AutoComplete"
+          {...restProps}
           className={inputClass}
           value={this.state.value}
           onChange={this.onChange}
-          {...restProps}
         >
           <Input
             placeholder={placeholder}

@@ -4,6 +4,7 @@
 /node_modules
 # roadhog-api-doc ignore
 /src/utils/request-temp.js
+_roadhog-api-doc
 
 # production
 /dist
@@ -11,5 +12,12 @@
 # misc
 .DS_Store
 npm-debug.log*
+yarn-error.log
 
 /coverage
+.idea
+yarn.lock
+package-lock.json
+*bak
+jsconfig.json
+.prettierrc

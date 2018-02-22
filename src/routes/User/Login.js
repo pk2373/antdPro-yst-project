@@ -1,117 +1,96 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
-import { routerRedux, Link } from 'dva/router';
-import { Form, Input, Button, Icon, Checkbox, Alert } from 'antd';
+import { Link } from 'dva/router';
+import { Checkbox, Alert, Icon } from 'antd';
+import Login from '../../components/Login';
 import styles from './Login.less';
 
-const FormItem = Form.Item;
+const { Tab, UserName, Password, Mobile, Captcha, Submit } = Login;
 
-@connect(state => ({
-  login: state.login,
+@connect(({ login, loading }) => ({
+  login,
+  submitting: loading.effects['login/login'],
 }))
-@Form.create()
-
-export default class Login extends Component {
+export default class LoginPage extends Component {
   state = {
     type: 'account',
+    autoLogin: true,
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.login.status === 'ok') {
-      this.props.dispatch(routerRedux.push('/'));
+  onTabChange = (type) => {
+    this.setState({ type });
+  }
+
+  handleSubmit = (err, values) => {
+    if (!err) {
+      this.props.dispatch({
+        type: 'login/login',
+        payload: {
+          params: {
+            ...values,
+            subsystemEntity: {
+              code: 'S01',
+            },
+          },
+        },
+      });
     }
   }
 
-  handleSubmit = (e) => {
-    e.preventDefault();
-    const { type } = this.state;
-    this.props.form.validateFields({ force: true },
-      (err, values) => {
-        if (!err) {
-          values.systemId = '599e2e70d39b435fbb77a2eb8e7caafb';
-          this.props.dispatch({
-            type: `login/${type}Submit`,
-            payload: {
-              params: values,
-            },
-          });
-        }
-      }
-    );
+  changeAutoLogin = (e) => {
+    this.setState({
+      autoLogin: e.target.checked,
+    });
   }
 
-  renderMessage = (message) => {
+  renderMessage = (content) => {
     return (
-      <Alert
-        style={{ marginBottom: 24 }}
-        message={message}
-        type="error"
-        showIcon
-      />
+      <Alert style={{ marginBottom: 24 }} message={content} type="error" showIcon />
     );
   }
 
   render() {
-    const { form, login } = this.props;
-    const { getFieldDecorator } = form;
+    const { login, submitting } = this.props;
     const { type } = this.state;
     return (
       <div className={styles.main}>
-        <Form onSubmit={this.handleSubmit}>
-          {
-            login.status === 'error' &&
-            login.type === 'account' &&
-            login.submitting === false &&
-            this.renderMessage('账户或密码错误')
-          }
-          <FormItem>
-            {getFieldDecorator('username', {
-              rules: [{
-                required: type === 'account', message: '请输入账户名！',
-              }],
-            })(
-              <Input
-                size="large"
-                prefix={<Icon type="user" className={styles.prefixIcon} />}
-                placeholder="用户名"
-              />
-            )}
-          </FormItem>
-          <FormItem>
-            {getFieldDecorator('password', {
-              rules: [{
-                required: type === 'account', message: '请输入密码！',
-              }],
-            })(
-              <Input
-                size="large"
-                prefix={<Icon type="lock" className={styles.prefixIcon} />}
-                type="password"
-                placeholder="密码"
-              />
-            )}
-          </FormItem>
-          <FormItem className={styles.additional}>
-            {getFieldDecorator('remember', {
-              valuePropName: 'checked',
-              initialValue: true,
-            })(
-              <Checkbox className={styles.autoLogin}>自动登录</Checkbox>
-            )}
-            <a className={styles.forgot} href="">忘记密码</a>
-            <Button size="large" loading={login.submitting} className={styles.submit} type="primary" htmlType="submit">
-              登录
-            </Button>
-          </FormItem>
-        </Form>
-        <div className={styles.other}>
-          其他登录方式
-          {/* 需要加到 Icon 中 */}
-          <span className={styles.iconAlipay} />
-          <span className={styles.iconTaobao} />
-          <span className={styles.iconWeibo} />
-          <Link className={styles.register} to="/user/register">注册账户</Link>
-        </div>
+        <Login
+          defaultActiveKey={type}
+          onTabChange={this.onTabChange}
+          onSubmit={this.handleSubmit}
+        >
+          <Tab key="account" tab="账户密码登录">
+            {
+              login.status === false &&
+              !login.submitting &&
+              this.renderMessage('账户或密码错误')
+            }
+            <UserName name="username" placeholder="请输入用户名（admin）" />
+            <Password name="password" placeholder="请输入密码（a37887245）" />
+          </Tab>
+          <Tab key="mobile" tab="手机号登录">
+            {
+              login.status === 'error' &&
+              login.type === 'mobile' &&
+              !login.submitting &&
+              this.renderMessage('验证码错误')
+            }
+            <Mobile name="mobile" />
+            <Captcha name="captcha" />
+          </Tab>
+          <div>
+            <Checkbox checked={this.state.autoLogin} onChange={this.changeAutoLogin}>自动登录</Checkbox>
+            <a style={{ float: 'right' }} href="">忘记密码</a>
+          </div>
+          <Submit loading={submitting}>登录</Submit>
+          <div className={styles.other}>
+            其他登录方式
+            <Icon className={styles.icon} type="alipay-circle" />
+            <Icon className={styles.icon} type="taobao-circle" />
+            <Icon className={styles.icon} type="weibo-circle" />
+            <Link className={styles.register} to="/user/register">注册账户</Link>
+          </div>
+        </Login>
       </div>
     );
   }
