@@ -9,6 +9,7 @@ import createLoading from 'dva-loading';
 import 'moment/locale/zh-cn';
 import FastClick from 'fastclick';
 import './rollbar';
+import { init } from './init';
 
 import './index.less';
 // 1. Initialize
@@ -22,13 +23,14 @@ app.use(createLoading());
 // 3. Register global model
 app.model(require('./models/global').default);
 
-// 4. Router
-app.router(require('./router').default);
 
-// 5. Start
-app.start('#root');
+init( () => {
+  // 4. Router
+  app.router(require('./router').default);
 
+  // 5. Start
+  app.start('#root');
+  window.app_store = app._store;
+});
 
 FastClick.attach(document.body);
-
-export default app._store;  // eslint-disable-line

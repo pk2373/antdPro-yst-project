@@ -1,8 +1,8 @@
 import fetch from 'dva/fetch';
 import {notification} from 'antd';
 import {routerRedux} from 'dva/router';
-import store from '../index';
-
+// import store from '../index';
+// let store;
 const codeMessage = {
   200: '服务器成功返回请求的数据。',
   201: '新建或修改数据成功。',
@@ -26,7 +26,6 @@ function checkStatus(response) {
     return response;
   }
   const errortext = codeMessage[response.status] || response.statusText;
-  console.log(response)
   notification.error({
     message: `请求错误 ${response.status}: ${response.responseURL}`,
     description: errortext,
@@ -119,7 +118,7 @@ export default function request(url, options) {
       return response.json();
     })
     .catch((e) => {
-      const {dispatch} = store;
+      const {dispatch} = window.app_store;
       const status = e.name;
       if (status === 401) {
         dispatch({
