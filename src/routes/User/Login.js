@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {connect} from 'dva';
 import {Link} from 'dva/router';
-import {Checkbox, Alert, Icon} from 'antd';
+import {Alert, Checkbox, Icon} from 'antd';
 import Login from '../../components/Login';
 import styles from './Login.less';
 
@@ -24,17 +24,15 @@ export default class LoginPage extends Component {
     if (!err) {
       this.props.dispatch({
         type: 'login/login',
-        payload: values,
-        /*
-                payload: {
-                  params: {
-                    ...values,
-                    subsystemEntity: {
-                      code: 'S01',
-                    },
-                  },
-                },
-                */
+        // payload: values,
+        payload: {
+          params: {
+            ...values,
+            subsystemEntity: {
+              code: 'S01',
+            },
+          },
+        },
       });
     }
   }

@@ -15,14 +15,14 @@ export default {
       const response = yield call(accountLogin, payload);
       yield put({
         type: 'changeLoginStatus',
-        // payload: {
-        //   status: response.success,
-        //   currentAuthority: 'admin', // 权限控制
-        // },
-        payload: response,
+        payload: {
+          status: response.success,
+          currentAuthority: 'admin', // 权限控制
+        },
+        // payload: response,
       });
       // Login successfully
-      if (response.status === 'ok') {
+      if (response.success) {
         reloadAuthorized();
         yield put(routerRedux.push('/'));
       }

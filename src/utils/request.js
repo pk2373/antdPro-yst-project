@@ -66,9 +66,8 @@ function xhrRequest({url, method = 'POST', contentType = 'application/json', lim
   } );
 }
 
-// const host = 'http://test.gdyunst.com:8084';
-/*
-const host = 'http://192.168.1.118:8088';
+const host = 'https://www.gdyst.top:8088';
+// const host = 'https://192.168.1.118:8088';
 export default function request(link, options) {
   const url = host + link;
   return xhrRequest({ url: url, ...options })
@@ -78,7 +77,6 @@ export default function request(link, options) {
       return error;
     });
 }
-*/
 /**
  * Requests a URL, returning a promise.
  *
@@ -86,6 +84,7 @@ export default function request(link, options) {
  * @param  {object} [options] The options we want to pass to "fetch"
  * @return {object}           An object containing either "data" or "err"
  */
+/*
 export default function request(url, options) {
   const defaultOptions = {
     credentials: 'include',
@@ -139,3 +138,4 @@ export default function request(url, options) {
       }
     });
 }
+*/

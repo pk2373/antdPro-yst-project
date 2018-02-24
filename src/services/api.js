@@ -1,4 +1,4 @@
-import { stringify } from 'qs';
+import {stringify} from 'qs';
 import request from '../utils/request';
 
 export async function queryProjectNotice() {
@@ -61,15 +61,15 @@ export async function queryFakeList(params) {
 }
 
 export async function accountLogin(data) {
-/*
-return request('/public/api/login', {
+  return request('/public/api/login', {
     ...data,
   });
-  */
-  return request('/api/login/account', {
-    method: 'POST',
-    body: data,
-  });
+  /*
+   return request('/api/login/account', {
+      method: 'POST',
+      body: data,
+    });
+    */
 }
 
 export async function fakeRegister(params) {
