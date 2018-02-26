@@ -66,11 +66,11 @@ function xhrRequest({url, method = 'POST', contentType = 'application/json', lim
   } );
 }
 
-const host = 'https://www.gdyst.top:8088';
-// const host = 'https://192.168.1.118:8088';
+// const host = 'https://www.gdyst.top:8088';
+const host = 'http://192.168.1.118:8088';
 export default function request(link, options) {
-  const url = host + link;
-  return xhrRequest({ url: url, ...options })
+  const api = host + link;
+  return xhrRequest({ url: api, ...options })
     .then(checkStatus)
     .then(response => JSON.parse(response.responseText))
     .catch((error) => {

@@ -39,7 +39,7 @@ export default {
         yield put({
           type: 'changeLoginStatus',
           payload: {
-            status: false,
+            status: '',
             currentAuthority: 'guest',
           },
         });
