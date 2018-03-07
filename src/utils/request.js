@@ -1,4 +1,3 @@
-import fetch from 'dva/fetch';
 import {notification} from 'antd';
 import {routerRedux} from 'dva/router';
 // import store from '../index';
@@ -38,10 +37,13 @@ function checkStatus(response) {
 
 
 // XMLHttpRequest
-function xhrRequest({url, method = 'POST', contentType = 'application/json', limit = 20, page = 1, uid = '', params = {}}) {
+function xhrRequest({url, method = 'POST', contentType = 'application/json', limit = 10, page = 1, uid, params = {}}) {
   return new Promise((resolve) => {
     if (!url) {
       return;
+    }
+    if (!uid ) {
+      uid = localStorage.getItem('CXTravel_uid') || 1;
     }
     let allParams = {};
     if (method === 'post' || method === 'POST') {
@@ -51,6 +53,11 @@ function xhrRequest({url, method = 'POST', contentType = 'application/json', lim
         page: page,
         uid: uid,
       };
+    } else if (method === 'get' || method === 'GET' ){
+      for (const i in params ){
+        url = url +  '&' + i + '=' + params[i];
+      }
+      url = url.replace(/&/, '?');
     }
 
     const xhr = new XMLHttpRequest();
@@ -63,14 +70,14 @@ function xhrRequest({url, method = 'POST', contentType = 'application/json', lim
     xhr.open(method, url);
     xhr.setRequestHeader('Content-Type', contentType);
     xhr.send(JSON.stringify(allParams));
-  } );
+  });
 }
 
 // const host = 'https://www.gdyst.top:8088';
 const host = 'http://192.168.1.118:8088';
 export default function request(link, options) {
   const api = host + link;
-  return xhrRequest({ url: api, ...options })
+  return xhrRequest({url: api, ...options})
     .then(checkStatus)
     .then(response => JSON.parse(response.responseText))
     .catch((error) => {

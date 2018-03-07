@@ -1,4 +1,4 @@
-import { isUrl } from '../utils/utils';
+import {isUrl} from '../utils/utils';
 
 const menuData = [{
   name: 'dashboard',
@@ -14,6 +14,14 @@ const menuData = [{
     name: '工作台',
     path: 'workplace',
     // hideInMenu: true,
+  }],
+}, {
+  name: '工单',
+  icon: 'table',
+  path: 'page=workOrder&current=1',
+  children: [{
+    name: '工单一览',
+    path: 'workOrder-list',
   }],
 }, {
   name: '表单页',
@@ -33,7 +41,7 @@ const menuData = [{
 }, {
   name: '列表页',
   icon: 'table',
-  path: 'list',
+  path: 'page=table&current=1',
   children: [{
     name: '查询表格',
     path: 'table-list',
@@ -60,14 +68,14 @@ const menuData = [{
 }, {
   name: '详情页',
   icon: 'profile',
-  path: 'profile',
+  path: 'page=profile',
   children: [{
     name: '基础详情页',
-    path: 'basic',
+    path: 'profile/basic',
   }, {
     name: '高级详情页',
-    path: 'advanced',
-    authority: 'admin',
+    path: 'profile/advanced',
+    authority: 'user',
   }],
 }, {
   name: '结果页',
@@ -117,7 +125,7 @@ const menuData = [{
 
 function formatter(data, parentPath = '/', parentAuthority) {
   return data.map((item) => {
-    let { path } = item;
+    let {path} = item;
     if (!isUrl(path)) {
       path = parentPath + item.path;
     }

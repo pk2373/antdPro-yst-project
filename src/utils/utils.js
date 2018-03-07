@@ -157,3 +157,57 @@ const reg = /(((^https?:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-
 export function isUrl(path) {
   return reg.test(path);
 }
+
+export function getUrlPar() {
+  const urlParams = new URL(window.location.href);
+  const hash = urlParams.hash.replace('#/', '');
+  const slashIndex = hash.indexOf('/');
+  const list = hash.substring(0, slashIndex);
+  const listArray = list.split('&');
+  const paramsObj = {};
+  for (let i = 0, len = listArray.length; i < len; i++) {
+    const attr = listArray[i].split('=')[0];
+    let val = listArray[i].split('=')[1];
+    if (attr === 'current') {
+      val = val * 1;
+    }
+    paramsObj[attr] = val;
+  }
+  return paramsObj;
+}
+
+export function urlParAssign(newPar) {
+  const oldParams = getUrlPar();
+  const curObj = {...oldParams};
+  for (let i in oldParams) {
+    if (!newPar[i]) {
+      delete curObj[i];
+    }
+  }
+  const result = Object.assign(curObj, newPar);
+  let resultStr = '';
+  for (let i in result) {
+    resultStr += i + '=' + result[i] + '&';
+  }
+  resultStr = resultStr.substring(0, resultStr.length - 1);
+
+
+  const urlParams = new URL(window.location.href);
+  const hash = urlParams.hash.replace('#/', '');
+  const slashIndex = hash.indexOf('/');
+  const list = hash.substring(0, slashIndex);
+  urlParams.href = urlParams.href.replace(list, resultStr);
+  window.history.replaceState(null, '/', urlParams.hash);
+}
+
+export function getWorkOrderStatusText() {
+  return {
+    5: '待到店', 10: '已到店待定损', 20: '维修厂已定损', 25: '提交保险审核', 30: '保险已审核', 35: '保险审核不通过', 40: '修理中（提交修理）', 50: '已完成车主不同意修理', 60: '已完成车主已提车',
+  };
+}
+
+export function getWorkOrderCostateText() {
+  return {
+    1: '待评价', 2: '待评价',
+  };
+}

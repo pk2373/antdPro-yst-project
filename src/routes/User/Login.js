@@ -29,7 +29,7 @@ export default class LoginPage extends Component {
           params: {
             ...values,
             subsystemEntity: {
-              code: 'S01',
+              code: 'S02',
             },
           },
         },

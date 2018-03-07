@@ -1,5 +1,5 @@
 import { routerRedux } from 'dva/router';
-import { accountLogin } from '../services/api';
+import { accountLogin, accountLogout } from '../services/api';
 import { setAuthority } from '../utils/authority';
 import { reloadAuthorized } from '../utils/Authorized';
 
@@ -17,17 +17,19 @@ export default {
         type: 'changeLoginStatus',
         payload: {
           status: response.success,
-          currentAuthority: 'admin', // 权限控制
+          currentAuthority: 'user', // 权限控制
         },
         // payload: response,
       });
       // Login successfully
       if (response.success) {
+        localStorage.setItem('CXTravel_uid', response.data.id);
+        localStorage.setItem('CXTravel_secret', response.data.secret);
         reloadAuthorized();
         yield put(routerRedux.push('/'));
       }
     },
-    *logout(_, { put, select }) {
+    *logout(_, { call, put, select }) {
       try {
         // get location pathname
         const urlParams = new URL(window.location.href);
@@ -36,11 +38,14 @@ export default {
         urlParams.searchParams.set('redirect', pathname);
         window.history.replaceState(null, 'login', urlParams.href);
       } finally {
+        const response = yield call(accountLogout);
+        localStorage.setItem('CXTravel_uid', '');
+        localStorage.setItem('CXTravel_secret', '');
         yield put({
           type: 'changeLoginStatus',
           payload: {
             status: '',
-            currentAuthority: 'guest',
+            currentAuthority: '',
           },
         });
         reloadAuthorized();

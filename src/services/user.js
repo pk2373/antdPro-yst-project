@@ -5,5 +5,9 @@ export async function query() {
 }
 
 export async function queryCurrent() {
-  return request('/api/currentUser');
+  return request('/public/api/getAuths', {
+    params: {
+      secret: localStorage.getItem('CXTravel_secret'),
+    },
+  });
 }

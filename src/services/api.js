@@ -64,12 +64,10 @@ export async function accountLogin(data) {
   return request('/public/api/login', {
     ...data,
   });
-  /*
-   return request('/api/login/account', {
-      method: 'POST',
-      body: data,
-    });
-    */
+}
+
+export async function accountLogout() {
+  return request('/public/api/logout');
 }
 
 export async function fakeRegister(params) {
@@ -81,4 +79,20 @@ export async function fakeRegister(params) {
 
 export async function queryNotices() {
   return request('/api/notices');
+}
+
+export async function queryFunc(data) {
+  return request('/AdminBaseController/Func/list', {
+    ...data,
+  });
+}
+
+export async function queryWorkOrder(data) {
+  const api = {
+    list: '/BusinessBaseController/Workorder/list',
+    load: '/BusinessBaseController/Workorder/load',
+  }
+  return request(api[data.api], {
+    ...data,
+  });
 }

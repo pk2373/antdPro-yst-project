@@ -85,6 +85,12 @@ export const getRouterData = (app) => {
       // name: '工作台',
       // authority: 'admin',
     },
+    '/:urlPar/workOrder-list': {
+      component: dynamicWrapper(app, ['workOrder'], () => import('../routes/WorkOrder/WorkOrderList')),
+    },
+    '/:urlPar/workOrderDetail': {
+      component: dynamicWrapper(app, ['workOrder'], () => import('../routes/WorkOrder/WorkOrderDetail')),
+    },
     '/form/basic-form': {
       component: dynamicWrapper(app, ['form'], () => import('../routes/Forms/BasicForm')),
     },
@@ -103,8 +109,8 @@ export const getRouterData = (app) => {
     '/form/advanced-form': {
       component: dynamicWrapper(app, ['form'], () => import('../routes/Forms/AdvancedForm')),
     },
-    '/list/table-list': {
-      component: dynamicWrapper(app, ['rule'], () => import('../routes/List/TableList')),
+    '/:urlPar/table-list': {
+      component: dynamicWrapper(app, ['func'], () => import('../routes/List/TableList')),
     },
     '/list/basic-list': {
       component: dynamicWrapper(app, ['list'], () => import('../routes/List/BasicList')),
@@ -124,10 +130,10 @@ export const getRouterData = (app) => {
     '/list/search/articles': {
       component: dynamicWrapper(app, ['list'], () => import('../routes/List/Articles')),
     },
-    '/profile/basic': {
+    '/:urlPar/profile/basic': {
       component: dynamicWrapper(app, ['profile'], () => import('../routes/Profile/BasicProfile')),
     },
-    '/profile/advanced': {
+    '/:urlPar/profile/advanced': {
       component: dynamicWrapper(app, ['profile'], () => import('../routes/Profile/AdvancedProfile')),
     },
     '/result/success': {

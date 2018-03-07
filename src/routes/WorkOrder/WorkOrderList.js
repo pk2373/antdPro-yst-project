@@ -1,17 +1,14 @@
 import React, {Fragment, PureComponent} from 'react';
 import {connect} from 'dva';
-import moment from 'moment';
 import {
   Button,
   Card,
   Col,
-  DatePicker,
   Divider,
   Dropdown,
   Form,
   Icon,
   Input,
-  InputNumber,
   Menu,
   message,
   Modal,
@@ -20,65 +17,60 @@ import {
 } from 'antd';
 import StandardTable from '../../components/StandardTable';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
-import { getUrlPar, urlParAssign } from '../../utils/utils';
+import {getUrlPar, getWorkOrderCostateText, getWorkOrderStatusText, urlParAssign} from '../../utils/utils';
 
-import styles from './TableList.less';
+import styles from './workOrderList.less';
 
 const FormItem = Form.Item;
 const {Option} = Select;
 const getValue = obj => Object.keys(obj).map(key => obj[key]).join(',');
-// const statusMap = ['default', 'processing', 'success', 'error'];
-// const status = ['关闭', '运行中', '已上线', '异常'];
+const workOrderStatus = getWorkOrderStatusText();
+const workOrderCostate = getWorkOrderCostateText();
 const columns = [
   {
-    title: '编号',
-    dataIndex: 'code',
+    title: '车牌号码',
+    dataIndex: 'carPlate',
   },
   {
-    title: '描述',
-    dataIndex: 'text',
+    title: '工单号',
+    dataIndex: 'num',
+    render: (num, record) => (
+      <a href={`#/id=${record.id}/workOrderDetail`}>{num}</a>
+    )
   },
   {
-    title: '排序',
-    dataIndex: 'indexOrder',
-    sorter: true,
-    align: 'right',
-    // render: val => `${val} 万`,
-    // mark to display a total number
-    needTotal: true,
-  },
-  /*
-   {
-      title: '状态',
-      dataIndex: 'status',
-      filters: [
-        {
-          text: status[0],
-          value: 0,
-        },
-        {
-          text: status[1],
-          value: 1,
-        },
-        {
-          text: status[2],
-          value: 2,
-        },
-        {
-          text: status[3],
-          value: 3,
-        },
-      ],
-      render(val) {
-        return <Badge status={statusMap[val]} text={status[val]} />;
-      },
+    title: '工单状态',
+    dataIndex: 'status',
+    render(val) {
+      return workOrderStatus[val];
     },
-    */
+  },
+  {
+    title: '进度状态',
+    dataIndex: 'costate',
+    render(val) {
+      return workOrderCostate[val];
+    },
+  },
+  {
+    title: '工单详情',
+    dataIndex: 'orderDetail',
+  },
+  {
+    title: '接待员',
+    dataIndex: 'receptionistName',
+  },
+  {
+    title: '备注信息',
+    dataIndex: 'note',
+  },
+  {
+    title: '创建时间',
+    dataIndex: 'createDate',
+  },
   {
     title: '更新时间',
-    dataIndex: 'createDate',
-    sorter: true,
-    render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
+    dataIndex: 'operateDate',
   },
   {
     title: '操作',
@@ -123,16 +115,16 @@ const CreateForm = Form.create()((props) => {
   );
 });
 
-@connect(({func, loading}) => ({
-  func,
-  loading: loading.models.func,
+@connect(({user, workOrder, loading}) => ({
+  workOrder,
+  currentUser: user.currentUser,
+  loading: loading.models.workOrder,
 }))
 @Form.create()
 
-export default class TableList extends PureComponent {
+export default class WorkOrderList extends PureComponent {
   state = {
     modalVisible: false,
-    expandForm: false,
     selectedRows: [],
     formValues: {},
   };
@@ -140,16 +132,18 @@ export default class TableList extends PureComponent {
   componentDidMount() {
     const {dispatch} = this.props;
     dispatch({
-      type: 'func/fetch',
+      type: 'workOrder/fetch',
       payload: {
         page: getUrlPar().current,
-        params: getUrlPar()
+        params: {
+          ...getUrlPar(),
+        }
       },
     });
   }
 
   handleStandardTableChange = (pagination, filtersArg, sorter) => {
-    const {dispatch } = this.props;
+    const {dispatch} = this.props;
     const {formValues} = this.state;
 
     const filters = Object.keys(filtersArg).reduce((obj, key) => {
@@ -172,7 +166,7 @@ export default class TableList extends PureComponent {
     });
 
     dispatch({
-      type: 'func/fetch',
+      type: 'workOrder/fetch',
       payload: {
         params: params,
         page: pagination.current,
@@ -192,7 +186,7 @@ export default class TableList extends PureComponent {
     });
 
     dispatch({
-      type: 'func/fetch',
+      type: 'workOrder/fetch',
       payload: {
         page: 1,
         params: {},
@@ -215,7 +209,7 @@ export default class TableList extends PureComponent {
     switch (e.key) {
       case 'remove':
         dispatch({
-          type: 'func/remove',
+          type: 'workOrder/remove',
           payload: {
             no: selectedRows.map(row => row.no).join(','),
           },
@@ -260,7 +254,7 @@ export default class TableList extends PureComponent {
       });
 
       dispatch({
-        type: 'func/fetch',
+        type: 'workOrder/fetch',
         payload: {
           page: 1,
           params: values,
@@ -277,7 +271,7 @@ export default class TableList extends PureComponent {
 
   handleAdd = (fields) => {
     this.props.dispatch({
-      type: 'func/add',
+      type: 'workOrder/add',
       payload: {
         description: fields.desc,
       },
@@ -289,22 +283,22 @@ export default class TableList extends PureComponent {
     });
   }
 
-  renderSimpleForm() {
+  renderForm() {
     const {getFieldDecorator} = this.props.form;
     const urlPar = getUrlPar();
     return (
       <Form onSubmit={this.handleSearch} layout="inline">
         <Row gutter={{md: 8, lg: 24, xl: 48}}>
           <Col md={8} sm={24}>
-            <FormItem label="规则编号">
-              {getFieldDecorator('code', {initialValue: urlPar.code || '' })(
+            <FormItem label="车牌号码">
+              {getFieldDecorator('carPlate', {initialValue: urlPar.code || ''})(
                 <Input placeholder="请输入"/>
               )}
             </FormItem>
           </Col>
           <Col md={8} sm={24}>
-            <FormItem label="使用状态">
-              {getFieldDecorator('status', {initialValue: urlPar.status || '' })(
+            <FormItem label="单号">
+              {getFieldDecorator('num', {initialValue: urlPar.status || ''})(
                 <Select placeholder="请选择" style={{width: '100%'}}>
                   <Option value="0">关闭</Option>
                   <Option value="1">运行中</Option>
@@ -326,84 +320,8 @@ export default class TableList extends PureComponent {
     );
   }
 
-  renderAdvancedForm() {
-    const {getFieldDecorator} = this.props.form;
-    return (
-      <Form onSubmit={this.handleSearch} layout="inline">
-        <Row gutter={{md: 8, lg: 24, xl: 48}}>
-          <Col md={8} sm={24}>
-            <FormItem label="规则编号">
-              {getFieldDecorator('no')(
-                <Input placeholder="请输入"/>
-              )}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
-              {getFieldDecorator('status')(
-                <Select placeholder="请选择" style={{width: '100%'}}>
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
-                </Select>
-              )}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="调用次数">
-              {getFieldDecorator('number')(
-                <InputNumber style={{width: '100%'}}/>
-              )}
-            </FormItem>
-          </Col>
-        </Row>
-        <Row gutter={{md: 8, lg: 24, xl: 48}}>
-          <Col md={8} sm={24}>
-            <FormItem label="更新日期">
-              {getFieldDecorator('date')(
-                <DatePicker style={{width: '100%'}} placeholder="请输入更新日期"/>
-              )}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
-              {getFieldDecorator('status3')(
-                <Select placeholder="请选择" style={{width: '100%'}}>
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
-                </Select>
-              )}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="使用状态">
-              {getFieldDecorator('status4')(
-                <Select placeholder="请选择" style={{width: '100%'}}>
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
-                </Select>
-              )}
-            </FormItem>
-          </Col>
-        </Row>
-        <div style={{overflow: 'hidden'}}>
-          <span style={{float: 'right', marginBottom: 24}}>
-            <Button type="primary" htmlType="submit">查询</Button>
-            <Button style={{marginLeft: 8}} onClick={this.handleFormReset}>重置</Button>
-            <a style={{marginLeft: 8}} onClick={this.toggleForm}>
-              收起 <Icon type="up"/>
-            </a>
-          </span>
-        </div>
-      </Form>
-    );
-  }
-
-  renderForm() {
-    return this.state.expandForm ? this.renderAdvancedForm() : this.renderSimpleForm();
-  }
-
   render() {
-    const {func: {data, total }, loading} = this.props;
+    const {workOrder: {data, total}, loading} = this.props;
     const {selectedRows, modalVisible} = this.state;
     const pagination = getUrlPar();
 
