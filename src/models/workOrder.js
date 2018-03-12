@@ -19,15 +19,20 @@ export default {
       const response = yield call(queryWorkOrder, payload);
       yield put({
         type: 'save',
-        payload: response,
+        saveData: {
+          data: response.data,
+          total: response.total
+        }
       });
     },
     * fetchDetail({payload}, {call, put}) {
       payload.api = 'load';
       const response = yield call(queryWorkOrder, payload);
       yield put({
-        type: 'saveDetail',
-        payload: response,
+        type: 'save',
+        saveData: {
+          detail: response.data
+        }
       });
     },
     * add({payload, callback}, {call, put}) {
@@ -52,14 +57,7 @@ export default {
     save(state, action) {
       return {
         ...state,
-        data: action.payload.data,
-        total: action.payload.total,
-      };
-    },
-    saveDetail(state, action) {
-      return {
-        ...state,
-        detail: action.payload.data,
+        ...action.saveData
       };
     },
   },

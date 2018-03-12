@@ -1,23 +1,23 @@
-import React, { Fragment } from 'react';
+import React, {Fragment} from 'react';
 import PropTypes from 'prop-types';
-import { Layout, Icon, message } from 'antd';
+import {Icon, Layout, message, Modal} from 'antd';
 import DocumentTitle from 'react-document-title';
-import { connect } from 'dva';
-import { Route, Redirect, Switch, routerRedux } from 'dva/router';
-import { ContainerQuery } from 'react-container-query';
+import {connect} from 'dva';
+import {Redirect, Route, routerRedux, Switch} from 'dva/router';
+import {ContainerQuery} from 'react-container-query';
 import classNames from 'classnames';
-import { enquireScreen } from 'enquire-js';
+import {enquireScreen} from 'enquire-js';
 import GlobalHeader from '../components/GlobalHeader';
 import GlobalFooter from '../components/GlobalFooter';
 import SiderMenu from '../components/SiderMenu';
 import NotFound from '../routes/Exception/404';
-import { getRoutes } from '../utils/utils';
+import {getRoutes} from '../utils/utils';
 import Authorized from '../utils/Authorized';
-import { getMenuData } from '../common/menu';
+import {getMenuData} from '../common/menu';
 import logo from '../assets/logo.svg';
 
-const { Content, Header, Footer } = Layout;
-const { AuthorizedRoute } = Authorized;
+const {Content, Header, Footer} = Layout;
+const {AuthorizedRoute} = Authorized;
 
 /**
  * 根据菜单取得重定向地址.
@@ -72,13 +72,15 @@ class BasicLayout extends React.PureComponent {
   state = {
     isMobile,
   };
+
   getChildContext() {
-    const { location, routerData } = this.props;
+    const {location, routerData} = this.props;
     return {
       location,
       breadcrumbNameMap: routerData,
     };
   }
+
   componentDidMount() {
     enquireScreen((mobile) => {
       this.setState({
@@ -89,15 +91,17 @@ class BasicLayout extends React.PureComponent {
       type: 'user/fetchCurrent',
     });
   }
+
   getPageTitle() {
-    const { routerData, location } = this.props;
-    const { pathname } = location;
+    const {routerData, location} = this.props;
+    const {pathname} = location;
     let title = 'Ant Design Pro';
     if (routerData[pathname] && routerData[pathname].name) {
       title = `${routerData[pathname].name} - Ant Design Pro`;
     }
     return title;
   }
+
   getBashRedirect = () => {
     // According to the url parameter to redirect
     // 这里是重定向的,重定向到 url 的 redirect 参数所示地址
@@ -126,7 +130,7 @@ class BasicLayout extends React.PureComponent {
       payload: type,
     });
   }
-  handleMenuClick = ({ key }) => {
+  handleMenuClick = ({key}) => {
     if (key === 'triggerError') {
       this.props.dispatch(routerRedux.push('/exception/trigger'));
       return;
@@ -136,7 +140,40 @@ class BasicLayout extends React.PureComponent {
         type: 'login/logout',
       });
     }
+    if (key === 'getQrcode') {
+      const {currentUser, reachStoreQrcodeLink} = this.props;
+      if (!reachStoreQrcodeLink) {
+        this.props.dispatch({
+          type: 'user/getReachStoreQrcode',
+          payload: {
+            params: {
+              userId: currentUser.id,
+              path: 'pages/recommendRepair/confirmReachStore/confirmReachStore',
+            }
+          },
+          callback: () => {
+            this.qrcode();
+          }
+        });
+      } else {
+        this.qrcode();
+      }
+    }
   }
+
+  qrcode = () => {
+    const {reachStoreQrcodeLink} = this.props;
+    Modal.info({
+      title: '车主到店二维码',
+      maskClosable: true,
+      content: (
+        <div >
+          <img width={280} height={280} alt="车主到店二维码" src={reachStoreQrcodeLink}/>
+        </div>
+      ),
+    });
+  }
+
   handleNoticeVisibleChange = (visible) => {
     if (visible) {
       this.props.dispatch({
@@ -144,6 +181,7 @@ class BasicLayout extends React.PureComponent {
       });
     }
   }
+
   render() {
     const {
       currentUser, collapsed, fetchingNotices, notices, routerData, match, location,
@@ -164,7 +202,7 @@ class BasicLayout extends React.PureComponent {
           onCollapse={this.handleMenuCollapse}
         />
         <Layout>
-          <Header style={{ padding: 0 }}>
+          <Header style={{padding: 0}}>
             <GlobalHeader
               logo={logo}
               currentUser={currentUser}
@@ -178,11 +216,11 @@ class BasicLayout extends React.PureComponent {
               onNoticeVisibleChange={this.handleNoticeVisibleChange}
             />
           </Header>
-          <Content style={{ margin: '24px 24px 0', height: '100%' }}>
+          <Content style={{margin: '24px 24px 0', height: '100%'}}>
             <Switch>
               {
                 redirectData.map(item =>
-                  <Redirect key={item.from} exact from={item.from} to={item.to} />
+                  <Redirect key={item.from} exact from={item.from} to={item.to}/>
                 )
               }
               {
@@ -199,11 +237,11 @@ class BasicLayout extends React.PureComponent {
                   )
                 )
               }
-              <Redirect exact from="/" to={bashRedirect} />
-              <Route render={NotFound} />
+              <Redirect exact from="/" to={bashRedirect}/>
+              <Route render={NotFound}/>
             </Switch>
           </Content>
-          <Footer style={{ padding: 0 }}>
+          <Footer style={{padding: 0}}>
             <GlobalFooter
               links={[{
                 key: 'Pro 首页',
@@ -212,7 +250,7 @@ class BasicLayout extends React.PureComponent {
                 blankTarget: true,
               }, {
                 key: 'github',
-                title: <Icon type="github" />,
+                title: <Icon type="github"/>,
                 href: 'https://github.com/ant-design/ant-design-pro',
                 blankTarget: true,
               }, {
@@ -223,7 +261,7 @@ class BasicLayout extends React.PureComponent {
               }]}
               copyright={
                 <Fragment>
-                  Copyright <Icon type="copyright" /> 2018 蚂蚁金服体验技术部出品
+                  Copyright <Icon type="copyright"/> 2018 蚂蚁金服体验技术部出品
                 </Fragment>
               }
             />
@@ -242,8 +280,9 @@ class BasicLayout extends React.PureComponent {
   }
 }
 
-export default connect(({ user, global, loading }) => ({
+export default connect(({user, global, loading}) => ({
   currentUser: user.currentUser,
+  reachStoreQrcodeLink: user.reachStoreQrcodeLink,
   collapsed: global.collapsed,
   fetchingNotices: loading.effects['global/fetchNotices'],
   notices: global.notices,

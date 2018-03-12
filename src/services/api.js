@@ -87,6 +87,12 @@ export async function queryFunc(data) {
   });
 }
 
+export async function getReachStoreQrcode(data) {
+  return request('/recommandbusiness/api/createPerSonalwxa', {
+    ...data,
+  });
+}
+
 export async function queryWorkOrder(data) {
   const api = {
     list: '/BusinessBaseController/Workorder/list',

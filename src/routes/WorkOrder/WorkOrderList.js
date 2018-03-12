@@ -96,6 +96,7 @@ const CreateForm = Form.create()((props) => {
   return (
     <Modal
       title="新建规则"
+      wrapClassName="vertical-center-modal"
       visible={modalVisible}
       onOk={okHandle}
       onCancel={() => handleModalVisible()}

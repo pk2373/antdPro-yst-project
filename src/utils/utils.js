@@ -202,7 +202,7 @@ export function urlParAssign(newPar) {
 
 export function getWorkOrderStatusText() {
   return {
-    5: '待到店', 10: '已到店待定损', 20: '维修厂已定损', 25: '提交保险审核', 30: '保险已审核', 35: '保险审核不通过', 40: '修理中（提交修理）', 50: '已完成车主不同意修理', 60: '已完成车主已提车',
+    2: '车主不同意推修', 5: '待到店', 10: '已到店待定损', 20: '维修厂已定损', 25: '提交保险审核', 30: '保险已审核', 35: '保险审核不通过', 40: '修理中（提交修理）', 50: '已完成车主不同意修理', 60: '已完成车主已提车',
   };
 }
 
@@ -211,3 +211,20 @@ export function getWorkOrderCostateText() {
     1: '待评价', 2: '待评价',
   };
 }
+
+export function getImgHost() {
+  let host;
+  const hostname = location.hostname;
+  const origin = window.location.origin;
+  if (/gdyunst.com/.test(hostname)) {
+    host = origin + '/jqzyweb/';
+  } else {
+    // host = 'http://192.168.1.50:8888'; //斌哥
+    //  host = 'http://123.207.53.31:8084'; // 测试服务器
+    host = 'http://192.168.1.118'; // 帅哥
+    // host = 'http://192.168.1.115:8084'; //本地
+    // host = 'http://www.gdyunst.com/jqzy';
+  }
+  return host;
+}
+
