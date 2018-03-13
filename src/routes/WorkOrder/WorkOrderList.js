@@ -4,16 +4,12 @@ import {
   Button,
   Card,
   Col,
-  Divider,
   Dropdown,
   Form,
   Icon,
   Input,
   Menu,
-  message,
-  Modal,
   Row,
-  Select
 } from 'antd';
 import StandardTable from '../../components/StandardTable';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
@@ -22,7 +18,6 @@ import {getUrlPar, getWorkOrderCostateText, getWorkOrderStatusText, urlParAssign
 import styles from './workOrderList.less';
 
 const FormItem = Form.Item;
-const {Option} = Select;
 const getValue = obj => Object.keys(obj).map(key => obj[key]).join(',');
 const workOrderStatus = getWorkOrderStatusText();
 const workOrderCostate = getWorkOrderCostateText();
@@ -77,44 +72,12 @@ const columns = [
     dataIndex: 'id',
     render: id => (
       <Fragment>
-        <a href={`#/id=${id}/profile/basic`}>配置</a>
-        <Divider type="vertical"/>
-        <a href="">订阅警报</a>
+        <a href={`#/id=${id}/profile/basic`} >删除</a>
       </Fragment>
     ),
   },
 ];
 
-const CreateForm = Form.create()((props) => {
-  const {modalVisible, form, handleAdd, handleModalVisible} = props;
-  const okHandle = () => {
-    form.validateFields((err, fieldsValue) => {
-      if (err) return;
-      handleAdd(fieldsValue);
-    });
-  };
-  return (
-    <Modal
-      title="新建规则"
-      wrapClassName="vertical-center-modal"
-      visible={modalVisible}
-      onOk={okHandle}
-      onCancel={() => handleModalVisible()}
-    >
-      <FormItem
-        labelCol={{span: 5}}
-        wrapperCol={{span: 15}}
-        label="描述"
-      >
-        {form.getFieldDecorator('desc', {
-          rules: [{required: true, message: 'Please input some description...'}],
-        })(
-          <Input placeholder="请输入"/>
-        )}
-      </FormItem>
-    </Modal>
-  );
-});
 
 @connect(({user, workOrder, loading}) => ({
   workOrder,
@@ -125,7 +88,6 @@ const CreateForm = Form.create()((props) => {
 
 export default class WorkOrderList extends PureComponent {
   state = {
-    modalVisible: false,
     selectedRows: [],
     formValues: {},
   };
@@ -195,12 +157,6 @@ export default class WorkOrderList extends PureComponent {
     });
   }
 
-  toggleForm = () => {
-    this.setState({
-      expandForm: !this.state.expandForm,
-    });
-  }
-
   handleMenuClick = (e) => {
     const {dispatch} = this.props;
     const {selectedRows} = this.state;
@@ -264,26 +220,6 @@ export default class WorkOrderList extends PureComponent {
     });
   }
 
-  handleModalVisible = (flag) => {
-    this.setState({
-      modalVisible: !!flag,
-    });
-  }
-
-  handleAdd = (fields) => {
-    this.props.dispatch({
-      type: 'workOrder/add',
-      payload: {
-        description: fields.desc,
-      },
-    });
-
-    message.success('添加成功');
-    this.setState({
-      modalVisible: false,
-    });
-  }
-
   renderForm() {
     const {getFieldDecorator} = this.props.form;
     const urlPar = getUrlPar();
@@ -299,11 +235,8 @@ export default class WorkOrderList extends PureComponent {
           </Col>
           <Col md={8} sm={24}>
             <FormItem label="单号">
-              {getFieldDecorator('num', {initialValue: urlPar.status || ''})(
-                <Select placeholder="请选择" style={{width: '100%'}}>
-                  <Option value="0">关闭</Option>
-                  <Option value="1">运行中</Option>
-                </Select>
+              {getFieldDecorator('num', {initialValue: urlPar.num || ''})(
+                <Input placeholder="请输入"/>
               )}
             </FormItem>
           </Col>
@@ -311,9 +244,6 @@ export default class WorkOrderList extends PureComponent {
             <span className={styles.submitButtons}>
               <Button type="primary" htmlType="submit">查询</Button>
               <Button style={{marginLeft: 8}} onClick={this.handleFormReset}>重置</Button>
-              <a style={{marginLeft: 8}} onClick={this.toggleForm}>
-                展开 <Icon type="down"/>
-              </a>
             </span>
           </Col>
         </Row>
@@ -323,7 +253,7 @@ export default class WorkOrderList extends PureComponent {
 
   render() {
     const {workOrder: {data, total}, loading} = this.props;
-    const {selectedRows, modalVisible} = this.state;
+    const {selectedRows} = this.state;
     const pagination = getUrlPar();
 
     const menu = (
@@ -333,11 +263,6 @@ export default class WorkOrderList extends PureComponent {
       </Menu>
     );
 
-    const parentMethods = {
-      handleAdd: this.handleAdd,
-      handleModalVisible: this.handleModalVisible,
-    };
-
     return (
       <PageHeaderLayout title="查询表格">
         <Card bordered={false}>
@@ -346,9 +271,6 @@ export default class WorkOrderList extends PureComponent {
               {this.renderForm()}
             </div>
             <div className={styles.tableListOperator}>
-              <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
-                新建
-              </Button>
               {
                 selectedRows.length > 0 && (
                   <span>
@@ -374,10 +296,6 @@ export default class WorkOrderList extends PureComponent {
             />
           </div>
         </Card>
-        <CreateForm
-          {...parentMethods}
-          modalVisible={modalVisible}
-        />
       </PageHeaderLayout>
     );
   }

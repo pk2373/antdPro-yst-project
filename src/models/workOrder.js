@@ -7,9 +7,8 @@ export default {
     data: [],
     total: '',
     detail: {
-      advancedOperation1: [],
-      advancedOperation2: [],
-      advancedOperation3: [],
+      cardamagesChange: [],
+      cardamagesRepair: [],
     },
   },
 
@@ -21,17 +20,26 @@ export default {
         type: 'save',
         saveData: {
           data: response.data,
-          total: response.total
+          total: response.total,
         }
       });
     },
     * fetchDetail({payload}, {call, put}) {
       payload.api = 'load';
+      payload.params.loadRelate = true;
       const response = yield call(queryWorkOrder, payload);
+      const cardamagesChange = response.data.cardamagesChange;
+      const cardamagesRepair = response.data.cardamagesRepair;
+      for (let i = 0, len = cardamagesChange.length; i < len; i++) {
+        cardamagesChange[i].key = cardamagesChange[i].id;
+      }
+      for (let i = 0, len = cardamagesRepair.length; i < len; i++) {
+        cardamagesRepair[i].key = cardamagesRepair[i].id;
+      }
       yield put({
         type: 'save',
         saveData: {
-          detail: response.data
+          detail: response.data,
         }
       });
     },

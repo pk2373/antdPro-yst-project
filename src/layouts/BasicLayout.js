@@ -148,7 +148,7 @@ class BasicLayout extends React.PureComponent {
           payload: {
             params: {
               userId: currentUser.id,
-              path: 'pages/recommendRepair/confirmReachStore/confirmReachStore',
+              path: `pages/index/index?page=/pages/recommendRepair/confirmReachStore/confirmReachStore&userId=${currentUser.id}`,
             }
           },
           callback: () => {
