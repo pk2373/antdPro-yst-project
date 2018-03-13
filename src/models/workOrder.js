@@ -24,7 +24,7 @@ export default {
         }
       });
     },
-    * fetchDetail({payload}, {call, put}) {
+    * fetchDetail({payload, callback}, {call, put}) {
       payload.api = 'load';
       payload.params.loadRelate = true;
       const response = yield call(queryWorkOrder, payload);
@@ -42,6 +42,7 @@ export default {
           detail: response.data,
         }
       });
+      callback ? callback() : '';
     },
     * add({payload, callback}, {call, put}) {
       const response = yield call(queryWorkOrder, payload);

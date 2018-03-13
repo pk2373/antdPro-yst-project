@@ -2,10 +2,27 @@ import React, {Component, Fragment} from 'react';
 import Debounce from 'lodash-decorators/debounce';
 import Bind from 'lodash-decorators/bind';
 import {connect} from 'dva';
-import {Input, Badge, Button, Card, Col, Divider, Dropdown, Icon, Menu, Popover, Row, Steps, Table, Tooltip} from 'antd';
+import {
+  Input,
+  Badge,
+  Button,
+  Card,
+  Col,
+  Divider,
+  Dropdown,
+  Icon,
+  Menu,
+  Popover,
+  Row,
+  Steps,
+  Table,
+  Tooltip,
+  Popconfirm,
+} from 'antd';
 import classNames from 'classnames';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 import DescriptionList from '../../components/DescriptionList';
+import EditableTable from '../../components/EditableTable';
 import styles from './WorkOrderDetail.less';
 
 import {getUrlPar} from '../../utils/utils';
@@ -109,21 +126,17 @@ const columns = [{
   title: '项目名称',
   dataIndex: 'itemText',
   key: 'itemText',
-  render: (text, record) => this.renderColumns(text, record, 'itemText'),
 }, {
   title: '数量',
   dataIndex: 'number',
   key: 'number',
-  render: (text, record) => this.renderColumns(text, record, 'number'),
 }, {
   title: '价格',
   dataIndex: 'itemPrice',
   key: 'itemPrice',
-  render: (text, record) => this.renderColumns(text, record, 'itemPrice'),
 }, {
   title: '备注',
   dataIndex: 'note',
-  render: (text, record) => this.renderColumns(text, record, 'note'),
 }];
 
 const EditableCell = ({editable, value, onChange}) => (
@@ -135,85 +148,6 @@ const EditableCell = ({editable, value, onChange}) => (
   </div>
 );
 
-class EditableTable extends React.Component {
-  constructor(props) {
-    super(props);
-    this.columns = [{
-      title: '项目名称',
-      dataIndex: 'itemText',
-      key: 'itemText',
-      render: (text, record) => this.renderColumns(text, record, 'itemText'),
-    }, {
-      title: '数量',
-      dataIndex: 'number',
-      key: 'number',
-      render: (text, record) => this.renderColumns(text, record, 'number'),
-    }, {
-      title: '价格',
-      dataIndex: 'itemPrice',
-      key: 'itemPrice',
-      render: (text, record) => this.renderColumns(text, record, 'itemPrice'),
-    }, {
-      title: '备注',
-      dataIndex: 'note',
-      render: (text, record) => this.renderColumns(text, record, 'note'),
-    }];
-    this.state = {data};
-    this.cacheData = data.map(item => ({...item}));
-  }
-
-  renderColumns(text, record, column) {
-    return (
-      <EditableCell
-        editable={record.editable}
-        value={text}
-        onChange={value => this.handleChange(value, record.key, column)}
-      />
-    );
-  }
-
-  handleChange(value, key, column) {
-    const newData = [...this.state.data];
-    const target = newData.filter(item => key === item.key)[0];
-    if (target) {
-      target[column] = value;
-      this.setState({data: newData});
-    }
-  }
-
-  edit(key) {
-    const newData = [...this.state.data];
-    const target = newData.filter(item => key === item.key)[0];
-    if (target) {
-      target.editable = true;
-      this.setState({data: newData});
-    }
-  }
-
-  save(key) {
-    const newData = [...this.state.data];
-    const target = newData.filter(item => key === item.key)[0];
-    if (target) {
-      delete target.editable;
-      this.setState({data: newData});
-      this.cacheData = newData.map(item => ({...item}));
-    }
-  }
-
-  cancel(key) {
-    const newData = [...this.state.data];
-    const target = newData.filter(item => key === item.key)[0];
-    if (target) {
-      Object.assign(target, this.cacheData.filter(item => key === item.key)[0]);
-      delete target.editable;
-      this.setState({data: newData});
-    }
-  }
-
-  render() {
-    return <Table bordered dataSource={this.state.data} columns={this.columns}/>;
-  }
-}
 
 @connect(({workOrder, loading}) => ({
   workOrder,
@@ -221,9 +155,14 @@ class EditableTable extends React.Component {
 }))
 
 export default class WorkOrderDetail extends Component {
-  state = {
-    operationkey: 'tab1',
-    stepDirection: 'horizontal',
+  constructor(props) {
+    super(props);
+    this.state = {
+      operationkey: 'tab1',
+      stepDirection: 'horizontal',
+      cardamagesChange: [],
+      cardamagesRepair: [],
+    };
   }
 
   componentDidMount() {
@@ -233,6 +172,9 @@ export default class WorkOrderDetail extends Component {
       type: 'workOrder/fetchDetail',
       payload: {
         params: params
+      },
+      callback: () => {
+        this.setData();
       }
     });
 
@@ -247,6 +189,14 @@ export default class WorkOrderDetail extends Component {
 
   onOperationTabChange = (key) => {
     this.setState({operationkey: key});
+  }
+
+  setData() {
+    const {workOrder: {detail: {cardamagesChange, cardamagesRepair}}} = this.props;
+    this.setState({
+      cardamagesChange: cardamagesChange,
+      cardamagesRepair: cardamagesRepair,
+    });
   }
 
   @Bind()
@@ -265,22 +215,108 @@ export default class WorkOrderDetail extends Component {
     }
   }
 
+  edit(key) {
+    const newData = [...this.state.cardamagesChange];
+    const target = newData.filter(item => key === item.key)[0];
+    if (target) {
+      target.editable = true;
+      this.setState({cardamagesChange: newData});
+    }
+  }
+
+  save(key) {
+    const newData = [...this.state.data];
+    const target = newData.filter(item => key === item.key)[0];
+    if (target) {
+      delete target.editable;
+      this.setState({cardamagesChange: newData});
+      this.cacheData = newData.map(item => ({...item}));
+    }
+  }
+
+  handleChange(value, key, column) {
+    const newData = [...this.state.cardamagesChange];
+    const target = newData.filter(item => key === item.key)[0];
+    if (target) {
+      target[column] = value;
+      this.setState({cardamagesChange: newData});
+    }
+  }
+
+  renderColumns(text, record, column) {
+    return (
+      <EditableCell
+        editable={record.editable}
+        value={text}
+        onChange={value => this.handleChange(value, record.key, column)}
+      />
+    );
+  }
+
   render() {
     const {stepDirection} = this.state;
     const {workOrder, loading} = this.props;
     const {detail} = workOrder;
-    const {cardamagesChange, cardamagesRepair} = detail;
+
+    let columns2 = [{
+      title: '项目名称',
+      dataIndex: 'itemText',
+      key: 'itemText',
+      render: (text, record) => this.renderColumns(text, record, 'itemText'),
+    }, {
+      title: '数量',
+      dataIndex: 'number',
+      key: 'number',
+      render: (text, record) => this.renderColumns(text, record, 'number'),
+    }, {
+      title: '价格',
+      dataIndex: 'itemPrice',
+      key: 'itemPrice',
+      render: (text, record) => this.renderColumns(text, record, 'itemPrice'),
+    }, {
+      title: '备注',
+      dataIndex: 'note',
+      render: (text, record) => this.renderColumns(text, record, 'note'),
+    }]
+
+    const columns3 = [...columns2];
+    columns3[4] = {
+      title: 'operation',
+      dataIndex: 'operation',
+      render: (text, record) => {
+        const {editable} = record;
+        return (
+          <div className="editable-row-operations">
+            {
+              editable ?
+                (
+                  <span>
+                <a onClick={() => this.save(record.key)}>Save</a>
+                <Popconfirm title="Sure to cancel?" onConfirm={() => this.cancel(record.key)}>
+                  <a>Cancel</a>
+                </Popconfirm>
+              </span>
+                )
+                : <a onClick={() => this.edit(record.key)}>Edit</a>
+            }
+          </div>
+        );
+      },
+    }
+
+    console.log(columns3)
+
     const contentList = {
-      tab1: <Table
+      tab1: <EditableTable
         pagination={false}
         loading={loading}
-        dataSource={cardamagesChange}
-        columns={columns}
+        data={this.state.cardamagesChange}
+        columns={columns3}
       />,
       tab2: <Table
         pagination={false}
         loading={loading}
-        dataSource={cardamagesRepair}
+        dataSource={this.state.cardamagesRepair}
         columns={columns}
       />,
     };
