@@ -1,103 +1,44 @@
-import React, {Fragment, PureComponent} from 'react';
-import {connect} from 'dva';
+import React, { PureComponent, Fragment } from 'react';
+import { connect } from 'dva';
 import moment from 'moment';
 import {
-  Button,
-  Card,
-  Col,
-  DatePicker,
-  Divider,
-  Dropdown,
-  Form,
-  Icon,
-  Input,
-  InputNumber,
-  Menu,
-  message,
-  Modal,
   Row,
-  Select
+  Col,
+  Card,
+  Form,
+  Input,
+  Select,
+  Icon,
+  Button,
+  Dropdown,
+  Menu,
+  InputNumber,
+  DatePicker,
+  Modal,
+  message,
+  Badge,
+  Divider,
 } from 'antd';
-import StandardTable from '../../components/StandardTable';
+import StandardTable from 'components/StandardTable';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
-import { getUrlPar, urlParAssign } from '../../utils/utils';
 
 import styles from './TableList.less';
 
 const FormItem = Form.Item;
-const {Option} = Select;
-const getValue = obj => Object.keys(obj).map(key => obj[key]).join(',');
-// const statusMap = ['default', 'processing', 'success', 'error'];
-// const status = ['关闭', '运行中', '已上线', '异常'];
-const columns = [
-  {
-    title: '编号',
-    dataIndex: 'code',
-  },
-  {
-    title: '描述',
-    dataIndex: 'text',
-  },
-  {
-    title: '排序',
-    dataIndex: 'indexOrder',
-    sorter: true,
-    align: 'right',
-    // render: val => `${val} 万`,
-    // mark to display a total number
-    needTotal: true,
-  },
-  /*
-   {
-      title: '状态',
-      dataIndex: 'status',
-      filters: [
-        {
-          text: status[0],
-          value: 0,
-        },
-        {
-          text: status[1],
-          value: 1,
-        },
-        {
-          text: status[2],
-          value: 2,
-        },
-        {
-          text: status[3],
-          value: 3,
-        },
-      ],
-      render(val) {
-        return <Badge status={statusMap[val]} text={status[val]} />;
-      },
-    },
-    */
-  {
-    title: '更新时间',
-    dataIndex: 'createDate',
-    sorter: true,
-    render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
-  },
-  {
-    title: '操作',
-    dataIndex: 'id',
-    render: id => (
-      <Fragment>
-        <a href={`#/id=${id}/profile/basic`}>配置</a>
-        <Divider type="vertical"/>
-        <a href="">订阅警报</a>
-      </Fragment>
-    ),
-  },
-];
+const { Option } = Select;
+const getValue = obj =>
+  Object.keys(obj)
+    .map(key => obj[key])
+    .join(',');
+const statusMap = ['default', 'processing', 'success', 'error'];
+const status = ['关闭', '运行中', '已上线', '异常'];
 
-const CreateForm = Form.create()((props) => {
-  const {modalVisible, form, handleAdd, handleModalVisible} = props;
+const CreateForm = Form.create()(props => {
+  const { modalVisible, form, handleAdd, handleModalVisible } = props;
   const okHandle = () => {
     form.validateFields((err, fieldsValue) => {
       if (err) return;
+      form.resetFields();
       handleAdd(fieldsValue);
     });
   };
@@ -108,27 +49,20 @@ const CreateForm = Form.create()((props) => {
       onOk={okHandle}
       onCancel={() => handleModalVisible()}
     >
-      <FormItem
-        labelCol={{span: 5}}
-        wrapperCol={{span: 15}}
-        label="描述"
-      >
+      <FormItem labelCol={{ span: 5 }} wrapperCol={{ span: 15 }} label="描述">
         {form.getFieldDecorator('desc', {
-          rules: [{required: true, message: 'Please input some description...'}],
-        })(
-          <Input placeholder="请输入"/>
-        )}
+          rules: [{ required: true, message: 'Please input some description...' }],
+        })(<Input placeholder="请输入" />)}
       </FormItem>
     </Modal>
   );
 });
 
-@connect(({func, loading}) => ({
-  func,
-  loading: loading.models.func,
+@connect(({ rule, loading }) => ({
+  rule,
+  loading: loading.models.rule,
 }))
 @Form.create()
-
 export default class TableList extends PureComponent {
   state = {
     modalVisible: false,
@@ -138,27 +72,25 @@ export default class TableList extends PureComponent {
   };
 
   componentDidMount() {
-    const {dispatch} = this.props;
+    const { dispatch } = this.props;
     dispatch({
-      type: 'func/fetch',
-      payload: {
-        page: getUrlPar().current,
-        params: getUrlPar()
-      },
+      type: 'rule/fetch',
     });
   }
 
   handleStandardTableChange = (pagination, filtersArg, sorter) => {
-    const {dispatch } = this.props;
-    const {formValues} = this.state;
+    const { dispatch } = this.props;
+    const { formValues } = this.state;
 
     const filters = Object.keys(filtersArg).reduce((obj, key) => {
-      const newObj = {...obj};
+      const newObj = { ...obj };
       newObj[key] = getValue(filtersArg[key]);
       return newObj;
     }, {});
 
     const params = {
+      currentPage: pagination.current,
+      pageSize: pagination.pageSize,
       ...formValues,
       ...filters,
     };
@@ -166,56 +98,40 @@ export default class TableList extends PureComponent {
       params.sorter = `${sorter.field}_${sorter.order}`;
     }
 
-    urlParAssign({
-      current: pagination.current,
-      ...params,
-    });
-
     dispatch({
-      type: 'func/fetch',
-      payload: {
-        params: params,
-        page: pagination.current,
-      },
+      type: 'rule/fetch',
+      payload: params,
     });
-  }
+  };
 
   handleFormReset = () => {
-    const {form, dispatch} = this.props;
+    const { form, dispatch } = this.props;
     form.resetFields();
     this.setState({
       formValues: {},
     });
-
-    urlParAssign({
-      current: 1,
-    });
-
     dispatch({
-      type: 'func/fetch',
-      payload: {
-        page: 1,
-        params: {},
-      },
+      type: 'rule/fetch',
+      payload: {},
     });
-  }
+  };
 
   toggleForm = () => {
     this.setState({
       expandForm: !this.state.expandForm,
     });
-  }
+  };
 
-  handleMenuClick = (e) => {
-    const {dispatch} = this.props;
-    const {selectedRows} = this.state;
+  handleMenuClick = e => {
+    const { dispatch } = this.props;
+    const { selectedRows } = this.state;
 
     if (!selectedRows) return;
 
     switch (e.key) {
       case 'remove':
         dispatch({
-          type: 'func/remove',
+          type: 'rule/remove',
           payload: {
             no: selectedRows.map(row => row.no).join(','),
           },
@@ -229,18 +145,18 @@ export default class TableList extends PureComponent {
       default:
         break;
     }
-  }
+  };
 
-  handleSelectRows = (rows) => {
+  handleSelectRows = rows => {
     this.setState({
       selectedRows: rows,
     });
-  }
+  };
 
-  handleSearch = (e) => {
+  handleSearch = e => {
     e.preventDefault();
 
-    const {dispatch, form} = this.props;
+    const { dispatch, form } = this.props;
 
     form.validateFields((err, fieldsValue) => {
       if (err) return;
@@ -254,30 +170,22 @@ export default class TableList extends PureComponent {
         formValues: values,
       });
 
-      urlParAssign({
-        current: 1,
-        ...values,
-      });
-
       dispatch({
-        type: 'func/fetch',
-        payload: {
-          page: 1,
-          params: values,
-        },
+        type: 'rule/fetch',
+        payload: values,
       });
     });
-  }
+  };
 
-  handleModalVisible = (flag) => {
+  handleModalVisible = flag => {
     this.setState({
       modalVisible: !!flag,
     });
-  }
+  };
 
-  handleAdd = (fields) => {
+  handleAdd = fields => {
     this.props.dispatch({
-      type: 'func/add',
+      type: 'rule/add',
       payload: {
         description: fields.desc,
       },
@@ -287,25 +195,22 @@ export default class TableList extends PureComponent {
     this.setState({
       modalVisible: false,
     });
-  }
+  };
 
   renderSimpleForm() {
-    const {getFieldDecorator} = this.props.form;
-    const urlPar = getUrlPar();
+    const { getFieldDecorator } = this.props.form;
     return (
       <Form onSubmit={this.handleSearch} layout="inline">
-        <Row gutter={{md: 8, lg: 24, xl: 48}}>
+        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
           <Col md={8} sm={24}>
             <FormItem label="规则编号">
-              {getFieldDecorator('code', {initialValue: urlPar.code || '' })(
-                <Input placeholder="请输入"/>
-              )}
+              {getFieldDecorator('no')(<Input placeholder="请输入" />)}
             </FormItem>
           </Col>
           <Col md={8} sm={24}>
             <FormItem label="使用状态">
-              {getFieldDecorator('status', {initialValue: urlPar.status || '' })(
-                <Select placeholder="请选择" style={{width: '100%'}}>
+              {getFieldDecorator('status')(
+                <Select placeholder="请选择" style={{ width: '100%' }}>
                   <Option value="0">关闭</Option>
                   <Option value="1">运行中</Option>
                 </Select>
@@ -314,10 +219,14 @@ export default class TableList extends PureComponent {
           </Col>
           <Col md={8} sm={24}>
             <span className={styles.submitButtons}>
-              <Button type="primary" htmlType="submit">查询</Button>
-              <Button style={{marginLeft: 8}} onClick={this.handleFormReset}>重置</Button>
-              <a style={{marginLeft: 8}} onClick={this.toggleForm}>
-                展开 <Icon type="down"/>
+              <Button type="primary" htmlType="submit">
+                查询
+              </Button>
+              <Button style={{ marginLeft: 8 }} onClick={this.handleFormReset}>
+                重置
+              </Button>
+              <a style={{ marginLeft: 8 }} onClick={this.toggleForm}>
+                展开 <Icon type="down" />
               </a>
             </span>
           </Col>
@@ -327,21 +236,19 @@ export default class TableList extends PureComponent {
   }
 
   renderAdvancedForm() {
-    const {getFieldDecorator} = this.props.form;
+    const { getFieldDecorator } = this.props.form;
     return (
       <Form onSubmit={this.handleSearch} layout="inline">
-        <Row gutter={{md: 8, lg: 24, xl: 48}}>
+        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
           <Col md={8} sm={24}>
             <FormItem label="规则编号">
-              {getFieldDecorator('no')(
-                <Input placeholder="请输入"/>
-              )}
+              {getFieldDecorator('no')(<Input placeholder="请输入" />)}
             </FormItem>
           </Col>
           <Col md={8} sm={24}>
             <FormItem label="使用状态">
               {getFieldDecorator('status')(
-                <Select placeholder="请选择" style={{width: '100%'}}>
+                <Select placeholder="请选择" style={{ width: '100%' }}>
                   <Option value="0">关闭</Option>
                   <Option value="1">运行中</Option>
                 </Select>
@@ -350,24 +257,22 @@ export default class TableList extends PureComponent {
           </Col>
           <Col md={8} sm={24}>
             <FormItem label="调用次数">
-              {getFieldDecorator('number')(
-                <InputNumber style={{width: '100%'}}/>
-              )}
+              {getFieldDecorator('number')(<InputNumber style={{ width: '100%' }} />)}
             </FormItem>
           </Col>
         </Row>
-        <Row gutter={{md: 8, lg: 24, xl: 48}}>
+        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
           <Col md={8} sm={24}>
             <FormItem label="更新日期">
               {getFieldDecorator('date')(
-                <DatePicker style={{width: '100%'}} placeholder="请输入更新日期"/>
+                <DatePicker style={{ width: '100%' }} placeholder="请输入更新日期" />
               )}
             </FormItem>
           </Col>
           <Col md={8} sm={24}>
             <FormItem label="使用状态">
               {getFieldDecorator('status3')(
-                <Select placeholder="请选择" style={{width: '100%'}}>
+                <Select placeholder="请选择" style={{ width: '100%' }}>
                   <Option value="0">关闭</Option>
                   <Option value="1">运行中</Option>
                 </Select>
@@ -377,7 +282,7 @@ export default class TableList extends PureComponent {
           <Col md={8} sm={24}>
             <FormItem label="使用状态">
               {getFieldDecorator('status4')(
-                <Select placeholder="请选择" style={{width: '100%'}}>
+                <Select placeholder="请选择" style={{ width: '100%' }}>
                   <Option value="0">关闭</Option>
                   <Option value="1">运行中</Option>
                 </Select>
@@ -385,12 +290,16 @@ export default class TableList extends PureComponent {
             </FormItem>
           </Col>
         </Row>
-        <div style={{overflow: 'hidden'}}>
-          <span style={{float: 'right', marginBottom: 24}}>
-            <Button type="primary" htmlType="submit">查询</Button>
-            <Button style={{marginLeft: 8}} onClick={this.handleFormReset}>重置</Button>
-            <a style={{marginLeft: 8}} onClick={this.toggleForm}>
-              收起 <Icon type="up"/>
+        <div style={{ overflow: 'hidden' }}>
+          <span style={{ float: 'right', marginBottom: 24 }}>
+            <Button type="primary" htmlType="submit">
+              查询
+            </Button>
+            <Button style={{ marginLeft: 8 }} onClick={this.handleFormReset}>
+              重置
+            </Button>
+            <a style={{ marginLeft: 8 }} onClick={this.toggleForm}>
+              收起 <Icon type="up" />
             </a>
           </span>
         </div>
@@ -403,9 +312,70 @@ export default class TableList extends PureComponent {
   }
 
   render() {
-    const {func: {data, total }, loading} = this.props;
-    const {selectedRows, modalVisible} = this.state;
-    const pagination = getUrlPar();
+    const { rule: { data }, loading } = this.props;
+    const { selectedRows, modalVisible } = this.state;
+
+    const columns = [
+      {
+        title: '规则编号',
+        dataIndex: 'no',
+      },
+      {
+        title: '描述',
+        dataIndex: 'description',
+      },
+      {
+        title: '服务调用次数',
+        dataIndex: 'callNo',
+        sorter: true,
+        align: 'right',
+        render: val => `${val} 万`,
+        // mark to display a total number
+        needTotal: true,
+      },
+      {
+        title: '状态',
+        dataIndex: 'status',
+        filters: [
+          {
+            text: status[0],
+            value: 0,
+          },
+          {
+            text: status[1],
+            value: 1,
+          },
+          {
+            text: status[2],
+            value: 2,
+          },
+          {
+            text: status[3],
+            value: 3,
+          },
+        ],
+        onFilter: (value, record) => record.status.toString() === value,
+        render(val) {
+          return <Badge status={statusMap[val]} text={status[val]} />;
+        },
+      },
+      {
+        title: '更新时间',
+        dataIndex: 'updatedAt',
+        sorter: true,
+        render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
+      },
+      {
+        title: '操作',
+        render: () => (
+          <Fragment>
+            <a href="">配置</a>
+            <Divider type="vertical" />
+            <a href="">订阅警报</a>
+          </Fragment>
+        ),
+      },
+    ];
 
     const menu = (
       <Menu onClick={this.handleMenuClick} selectedKeys={[]}>
@@ -423,42 +393,33 @@ export default class TableList extends PureComponent {
       <PageHeaderLayout title="查询表格">
         <Card bordered={false}>
           <div className={styles.tableList}>
-            <div className={styles.tableListForm}>
-              {this.renderForm()}
-            </div>
+            <div className={styles.tableListForm}>{this.renderForm()}</div>
             <div className={styles.tableListOperator}>
               <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
                 新建
               </Button>
-              {
-                selectedRows.length > 0 && (
-                  <span>
-                    <Button>批量操作</Button>
-                    <Dropdown overlay={menu}>
-                      <Button>
-                        更多操作 <Icon type="down"/>
-                      </Button>
-                    </Dropdown>
-                  </span>
-                )
-              }
+              {selectedRows.length > 0 && (
+                <span>
+                  <Button>批量操作</Button>
+                  <Dropdown overlay={menu}>
+                    <Button>
+                      更多操作 <Icon type="down" />
+                    </Button>
+                  </Dropdown>
+                </span>
+              )}
             </div>
             <StandardTable
               selectedRows={selectedRows}
               loading={loading}
               data={data}
-              total={total}
-              pagination={pagination}
               columns={columns}
               onSelectRow={this.handleSelectRows}
               onChange={this.handleStandardTableChange}
             />
           </div>
         </Card>
-        <CreateForm
-          {...parentMethods}
-          modalVisible={modalVisible}
-        />
+        <CreateForm {...parentMethods} modalVisible={modalVisible} />
       </PageHeaderLayout>
     );
   }

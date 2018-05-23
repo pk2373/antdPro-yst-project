@@ -1,4 +1,5 @@
 import {notification} from 'antd';
+import {staticFn} from './utils';
 import {routerRedux} from 'dva/router';
 // import store from '../index';
 // let store;
@@ -43,7 +44,8 @@ function xhrRequest({url, method = 'POST', contentType = 'application/json', lim
       return;
     }
     if (!uid ) {
-      uid = localStorage.getItem('CXTravel_uid') || 1;
+      const projectKey = staticFn().project_key;
+      uid = localStorage.getItem(`${projectKey}_uid`) || 1;
     }
     let allParams = {};
     if (method === 'post' || method === 'POST') {
@@ -73,8 +75,8 @@ function xhrRequest({url, method = 'POST', contentType = 'application/json', lim
   });
 }
 
-const host = 'https://www.gdyst.top:8088';
-// const host = 'http://192.168.1.118:8088';
+// const host = 'https://www.gdyst.top:8088';
+const host = 'http://192.168.1.233:8088';
 export default function request(link, options) {
   const api = host + link;
   return xhrRequest({url: api, ...options})

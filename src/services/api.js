@@ -1,4 +1,4 @@
-import {stringify} from 'qs';
+import { stringify } from 'qs';
 import request from '../utils/request';
 
 export async function queryProjectNotice() {
@@ -79,26 +79,4 @@ export async function fakeRegister(params) {
 
 export async function queryNotices() {
   return request('/api/notices');
-}
-
-export async function queryFunc(data) {
-  return request('/AdminBaseController/Func/list', {
-    ...data,
-  });
-}
-
-export async function getReachStoreQrcode(data) {
-  return request('/recommandbusiness/api/createPerSonalwxa', {
-    ...data,
-  });
-}
-
-export async function queryWorkOrder(data) {
-  const api = {
-    list: '/BusinessBaseController/Workorder/list',
-    load: '/BusinessBaseController/Workorder/load',
-  }
-  return request(api[data.api], {
-    ...data,
-  });
 }

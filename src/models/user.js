@@ -1,6 +1,4 @@
-import {query as queryUsers, queryCurrent} from '../services/user';
-import { getReachStoreQrcode } from '../services/api';
-import { getImgHost } from '../utils/utils';
+import { query as queryUsers, queryCurrent } from '../services/user';
 
 export default {
   namespace: 'user',
@@ -8,33 +6,22 @@ export default {
   state: {
     list: [],
     currentUser: {},
-    reachStoreQrcodeLink: '',
   },
 
   effects: {
-    * fetch(_, {call, put}) {
+    *fetch(_, { call, put }) {
       const response = yield call(queryUsers);
       yield put({
         type: 'save',
-        // payload: response,
-        saveData: { list: response }
+        payload: response,
       });
     },
-    * fetchCurrent(_, {call, put}) {
+    *fetchCurrent(_, { call, put }) {
       const response = yield call(queryCurrent);
       yield put({
-        type: 'save',
-        // payload: response.data,
-        saveData: { currentUser: response.data }
+        type: 'saveCurrentUser',
+        payload: response,
       });
-    },
-    * getReachStoreQrcode( {payload, callback}, {call, put}) {
-      const response = yield call(getReachStoreQrcode, payload);
-      yield put({
-        type: 'save',
-        saveData: { reachStoreQrcodeLink: getImgHost() + response.data }
-      });
-      callback ? callback() : '';
     },
   },
 
@@ -42,8 +29,13 @@ export default {
     save(state, action) {
       return {
         ...state,
-        ...action.saveData,
-        // list: action.payload,
+        list: action.payload,
+      };
+    },
+    saveCurrentUser(state, action) {
+      return {
+        ...state,
+        currentUser: action.payload,
       };
     },
     changeNotifyCount(state, action) {

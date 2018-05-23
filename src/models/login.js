@@ -2,6 +2,7 @@ import { routerRedux } from 'dva/router';
 import { accountLogin, accountLogout } from '../services/api';
 import { setAuthority } from '../utils/authority';
 import { reloadAuthorized } from '../utils/Authorized';
+import {staticFn} from '../utils/utils';
 
 export default {
   namespace: 'login',
@@ -23,8 +24,9 @@ export default {
       });
       // Login successfully
       if (response.success) {
-        localStorage.setItem('CXTravel_uid', response.data.id);
-        localStorage.setItem('CXTravel_secret', response.data.secret);
+        const projectKey = staticFn().project_key;
+        localStorage.setItem(`${projectKey}_uid`, response.data.id);
+        localStorage.setItem(`${projectKey}_secret`, response.data.secret);
         reloadAuthorized();
         yield put(routerRedux.push('/'));
       }
@@ -39,8 +41,9 @@ export default {
         window.history.replaceState(null, 'login', urlParams.href);
       } finally {
         const response = yield call(accountLogout);
-        localStorage.setItem('CXTravel_uid', '');
-        localStorage.setItem('CXTravel_secret', '');
+        const projectKey = staticFn().project_key;
+        localStorage.setItem(`${projectKey}_uid`, '');
+        localStorage.setItem(`${projectKey}_secret`, '');
         yield put({
           type: 'changeLoginStatus',
           payload: {
