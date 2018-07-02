@@ -72,8 +72,11 @@ export const getRouterData = app => {
     '/': {
       component: dynamicWrapper(app, ['user', 'login'], () => import('../layouts/BasicLayout')),
     },
-    '/dashboard/fwb': {
-      component: dynamicWrapper(app, [], () => import('../routes/FwbTest/TableForm')),
+    '/page=case&current=1/case': {
+      component: dynamicWrapper(app, ['cases'], () => import('../routes/Case/CaseList')),
+    },
+    '/:urlPar/case': {
+      component: dynamicWrapper(app, ['cases'], () => import('../routes/Case/CaseList')),
     },
     '/dashboard/analysis': {
       component: dynamicWrapper(app, ['chart'], () => import('../routes/Dashboard/Analysis')),

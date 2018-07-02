@@ -2,30 +2,39 @@ import { routerRedux } from 'dva/router';
 import { accountLogin, accountLogout } from '../services/api';
 import { setAuthority } from '../utils/authority';
 import { reloadAuthorized } from '../utils/Authorized';
-import {staticFn} from '../utils/utils';
+import { staticFn } from '../utils/utils';
 
 export default {
   namespace: 'login',
 
   state: {
     status: undefined,
+    submitting: false,
+    msg: '',
   },
 
   effects: {
     *login({ payload }, { call, put }) {
+      yield put({
+        type: 'changeLoginStatus',
+        payload: {
+          submitting: true, // 请求登陆中
+        },
+      });
       const response = yield call(accountLogin, payload);
       yield put({
         type: 'changeLoginStatus',
         payload: {
           status: response.success,
+          msg: response.msg,
+          submitting: false,
           currentAuthority: 'user', // 权限控制
         },
-        // payload: response,
       });
       // Login successfully
       if (response.success) {
         const projectKey = staticFn().project_key;
-        localStorage.setItem(`${projectKey}_uid`, response.data.id);
+        localStorage.setItem(`${projectKey}_uid`, response.data.userId);
         localStorage.setItem(`${projectKey}_secret`, response.data.secret);
         reloadAuthorized();
         yield put(routerRedux.push('/'));
@@ -40,7 +49,7 @@ export default {
         urlParams.searchParams.set('redirect', pathname);
         window.history.replaceState(null, 'login', urlParams.href);
       } finally {
-        const response = yield call(accountLogout);
+        yield call(accountLogout);
         const projectKey = staticFn().project_key;
         localStorage.setItem(`${projectKey}_uid`, '');
         localStorage.setItem(`${projectKey}_secret`, '');

@@ -61,7 +61,7 @@ export async function queryFakeList(params) {
 }
 
 export async function accountLogin(data) {
-  return request('/public/api/login', {
+  return request('/admin/LoginController/login', {
     ...data,
   });
 }
@@ -79,4 +79,16 @@ export async function fakeRegister(params) {
 
 export async function queryNotices() {
   return request('/api/notices');
+}
+
+export async function queryCurrent(data) {
+  return request('/admin/InitController/getAuths', {
+    ...data,
+  });
+}
+
+export async function commonQuery(data) {
+  return request(data.url, {
+    ...data,
+  });
 }

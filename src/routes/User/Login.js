@@ -4,7 +4,9 @@ import { Link } from 'dva/router';
 import { Checkbox, Alert, Icon } from 'antd';
 import Login from 'components/Login';
 import styles from './Login.less';
+import {staticFn} from '../../utils/utils';
 
+const { sysId } = staticFn();
 const { Tab, UserName, Password, Mobile, Captcha, Submit } = Login;
 
 @connect(({ login, loading }) => ({
@@ -29,9 +31,7 @@ export default class LoginPage extends Component {
         payload: {
           params: {
             ...values,
-            subsystemEntity: {
-              code: 'S02',
-            },
+            systemId: sysId,
           },
         },
       });
@@ -55,13 +55,16 @@ export default class LoginPage extends Component {
       <div className={styles.main}>
         <Login defaultActiveKey={type} onTabChange={this.onTabChange} onSubmit={this.handleSubmit}>
           <Tab key="account" tab="账户密码登录">
-            {login.status === 'error' &&
-              login.type === 'account' &&
+            {
+              login.status === false &&
               !login.submitting &&
-              this.renderMessage('账户或密码错误（admin）')}
-            <UserName name="username" placeholder="admin" />
-            <Password name="password" placeholder="123456" />
+              login.msg &&
+              this.renderMessage('请检查用户名密码')
+            }
+            <UserName name="username" placeholder="请输入账号" />
+            <Password name="password" placeholder="请输入密码" />
           </Tab>
+          {/*
           <Tab key="mobile" tab="手机号登录">
             {login.status === 'error' &&
               login.type === 'mobile' &&
@@ -70,24 +73,15 @@ export default class LoginPage extends Component {
             <Mobile name="mobile" />
             <Captcha name="captcha" />
           </Tab>
+          */}
           <div>
-            <Checkbox checked={this.state.autoLogin} onChange={this.changeAutoLogin}>
+           {/*
+<Checkbox checked={this.state.autoLogin} onChange={this.changeAutoLogin}>
               自动登录
             </Checkbox>
-            <a style={{ float: 'right' }} href="">
-              忘记密码
-            </a>
+            */}
           </div>
           <Submit loading={submitting}>登录</Submit>
-          <div className={styles.other}>
-            其他登录方式
-            <Icon className={styles.icon} type="alipay-circle" />
-            <Icon className={styles.icon} type="taobao-circle" />
-            <Icon className={styles.icon} type="weibo-circle" />
-            <Link className={styles.register} to="/user/register">
-              注册账户
-            </Link>
-          </div>
         </Login>
       </div>
     );

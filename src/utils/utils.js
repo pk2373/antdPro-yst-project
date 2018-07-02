@@ -4,6 +4,7 @@ import moment from 'moment';
 export function staticFn() {
   return {
     project_key: 'test',
+    sysId: "599e2e70d39b435fbb77a2eb8e7caafb",
   };
 }
 

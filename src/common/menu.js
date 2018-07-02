@@ -4,11 +4,12 @@ const menuData = [
   {
     name: 'dashboard',
     icon: 'dashboard',
-    path: 'dashboard',
+    // path: 'dashboard',
+    path: 'page=case&current=1',
     children: [
       {
-        name: '富文本测试',
-        path: 'fwb',
+        name: '案件一览',
+        path: 'case',
       },
       {
         name: '分析页',

@@ -1,6 +1,6 @@
 import {notification} from 'antd';
 import {staticFn} from './utils';
-import {routerRedux} from 'dva/router';
+// import {routerRedux} from 'dva/router';
 // import store from '../index';
 // let store;
 const codeMessage = {
@@ -38,7 +38,8 @@ function checkStatus(response) {
 
 
 // XMLHttpRequest
-function xhrRequest({url, method = 'POST', contentType = 'application/json', limit = 10, page = 1, uid, params = {}}) {
+const host = 'http://192.168.1.233:8891';
+function xhrRequest( {url, method = 'POST', contentType = 'application/json', pageSize = 10, page = 1, uid, params = {} } ) {
   return new Promise((resolve) => {
     if (!url) {
       return;
@@ -51,7 +52,7 @@ function xhrRequest({url, method = 'POST', contentType = 'application/json', lim
     if (method === 'post' || method === 'POST') {
       allParams = {
         data: params,
-        limit: limit,
+        limit: pageSize,
         page: page,
         uid: uid,
       };
@@ -69,17 +70,13 @@ function xhrRequest({url, method = 'POST', contentType = 'application/json', lim
       }
       resolve(xhr);
     };
-    xhr.open(method, url);
+    xhr.open(method, host + url);
     xhr.setRequestHeader('Content-Type', contentType);
     xhr.send(JSON.stringify(allParams));
   });
 }
-
-// const host = 'https://www.gdyst.top:8088';
-const host = 'http://192.168.1.233:8088';
 export default function request(link, options) {
-  const api = host + link;
-  return xhrRequest({url: api, ...options})
+  return xhrRequest({url: link, ...options})
     .then(checkStatus)
     .then(response => JSON.parse(response.responseText))
     .catch((error) => {
